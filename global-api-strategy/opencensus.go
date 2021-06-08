@@ -5,7 +5,7 @@ import (
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	"errors"
 	go_application "github.com/pefish/go-application"
-	_type "github.com/pefish/go-core-strategy/type"
+	_type "github.com/pefish/go-core-type/api-session"
 	go_error "github.com/pefish/go-error"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/plugin/ochttp/propagation/b3"

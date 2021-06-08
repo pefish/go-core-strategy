@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	jwt2 "github.com/dgrijalva/jwt-go"
-	_type "github.com/pefish/go-core-strategy/type"
+	_type "github.com/pefish/go-core-type/api-session"
 	"github.com/pefish/go-error"
 	"github.com/pefish/go-jwt"
 	"github.com/pefish/go-reflect"

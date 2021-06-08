@@ -2,10 +2,15 @@ package api_strategy
 
 import (
 	"errors"
-	_type "github.com/pefish/go-core-strategy/type"
+	_type "github.com/pefish/go-core-type/api-session"
 
 	"github.com/pefish/go-error"
 )
+
+// Execute(out _type.IApiSession, param interface{}) *go_error.ErrorInfo
+//	GetName() string
+//	GetDescription() string
+//	GetErrorCode() uint64
 
 type IpFilterStrategyClass struct {
 	errorCode uint64

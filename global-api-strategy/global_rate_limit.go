@@ -4,7 +4,7 @@ package global_api_strategy
 import (
 	"errors"
 	go_application "github.com/pefish/go-application"
-	_type "github.com/pefish/go-core-strategy/type"
+	_type "github.com/pefish/go-core-type/api-session"
 	"github.com/pefish/go-error"
 	"time"
 )

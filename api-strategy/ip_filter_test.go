@@ -3,7 +3,7 @@ package api_strategy
 import (
 	"github.com/golang/mock/gomock"
 	mock_api_session "github.com/pefish/go-core-strategy/api-strategy/mock/mock-api-session"
-	_type "github.com/pefish/go-core-strategy/type"
+	_type "github.com/pefish/go-core-type/api-session"
 	go_error "github.com/pefish/go-error"
 	go_logger "github.com/pefish/go-logger"
 	"github.com/pefish/go-test-assert"
