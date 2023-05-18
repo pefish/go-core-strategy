@@ -11,17 +11,17 @@ import (
 )
 
 type JwtAuthStrategyClass struct {
-	errorCode           uint64
-	pubKey              string
-	headerName          string
-	noCheckExpire       bool
-	disableUserId       bool
-	errorMsg            string
+	errorCode     uint64
+	pubKey        string
+	headerName    string
+	noCheckExpire bool
+	disableUserId bool
+	errorMsg      string
 }
 
 var JwtAuthApiStrategy = JwtAuthStrategyClass{
-	errorCode:           go_error.INTERNAL_ERROR_CODE,
-	errorMsg:            `Unauthorized`,
+	errorCode: go_error.INTERNAL_ERROR_CODE,
+	errorMsg:  `Unauthorized`,
 }
 
 type JwtAuthParam struct {
@@ -66,8 +66,12 @@ func (jwtAuth *JwtAuthStrategyClass) SetHeaderName(headerName string) {
 func (jwtAuth *JwtAuthStrategyClass) Execute(out _type.IApiSession, param interface{}) *go_error.ErrorInfo {
 	out.Logger().DebugF(`api-strategy %s trigger`, jwtAuth.GetName())
 
-	out.SetJwtHeaderName(jwtAuth.headerName)
-	jwt := out.Header(jwtAuth.headerName)
+	headerName := jwtAuth.headerName
+	if headerName == "" {
+		headerName = "Json-Web-Token"
+	}
+	out.SetJwtHeaderName(headerName)
+	jwt := out.Header(headerName)
 
 	verifyResult, token, err := go_jwt.Jwt.VerifyJwt(jwtAuth.pubKey, jwt, jwtAuth.noCheckExpire)
 	if err != nil {

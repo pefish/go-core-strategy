@@ -21,6 +21,26 @@ type MockIApiSession struct {
 	recorder *MockIApiSessionMockRecorder
 }
 
+func (m *MockIApiSession) SetPathVars(vars map[string]string) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *MockIApiSession) PathVars() map[string]string {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *MockIApiSession) Redirect(url string) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *MockIApiSession) Host() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 // MockIApiSessionMockRecorder is the mock recorder for MockIApiSession.
 type MockIApiSessionMockRecorder struct {
 	mock *MockIApiSession
