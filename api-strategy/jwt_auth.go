@@ -1,7 +1,6 @@
 package api_strategy
 
 import (
-	"errors"
 	"fmt"
 	jwt2 "github.com/dgrijalva/jwt-go"
 	_type "github.com/pefish/go-core-type/api-session"
@@ -10,7 +9,7 @@ import (
 	"github.com/pefish/go-reflect"
 )
 
-type JwtAuthStrategyClass struct {
+type JwtAuthStrategy struct {
 	errorCode     uint64
 	pubKey        string
 	headerName    string
@@ -19,7 +18,7 @@ type JwtAuthStrategyClass struct {
 	errorMsg      string
 }
 
-var JwtAuthApiStrategy = JwtAuthStrategyClass{
+var JwtAuthApiStrategyInstance = JwtAuthStrategy{
 	errorCode: go_error.INTERNAL_ERROR_CODE,
 	errorMsg:  `Unauthorized`,
 }
@@ -27,65 +26,73 @@ var JwtAuthApiStrategy = JwtAuthStrategyClass{
 type JwtAuthParam struct {
 }
 
-func (jwtAuth *JwtAuthStrategyClass) GetName() string {
-	return `jwtAuth`
+func (jas *JwtAuthStrategy) GetName() string {
+	return `JwtAuthStrategy`
 }
 
-func (jwtAuth *JwtAuthStrategyClass) GetDescription() string {
+func (jas *JwtAuthStrategy) GetDescription() string {
 	return `jwt auth`
 }
 
-func (jwtAuth *JwtAuthStrategyClass) SetErrorCode(code uint64) {
-	jwtAuth.errorCode = code
+func (jas *JwtAuthStrategy) SetErrorCode(code uint64) {
+	jas.errorCode = code
 }
 
-func (jwtAuth *JwtAuthStrategyClass) SetErrorMessage(msg string) {
-	jwtAuth.errorMsg = msg
+func (jas *JwtAuthStrategy) SetErrorMsg(msg string) {
+	jas.errorMsg = msg
 }
 
-func (jwtAuth *JwtAuthStrategyClass) GetErrorCode() uint64 {
-	return jwtAuth.errorCode
+func (jas *JwtAuthStrategy) GetErrorMsg() string {
+	if jas.errorMsg == "" {
+		return "Unauthorized."
+	}
+	return jas.errorMsg
 }
 
-func (jwtAuth *JwtAuthStrategyClass) SetNoCheckExpire() {
-	jwtAuth.noCheckExpire = true
+func (jas *JwtAuthStrategy) GetErrorCode() uint64 {
+	return jas.errorCode
 }
 
-func (jwtAuth *JwtAuthStrategyClass) DisableUserId() {
-	jwtAuth.disableUserId = true
+func (jas *JwtAuthStrategy) SetNoCheckExpire() {
+	jas.noCheckExpire = true
 }
 
-func (jwtAuth *JwtAuthStrategyClass) SetPubKey(pubKey string) {
-	jwtAuth.pubKey = pubKey
+func (jas *JwtAuthStrategy) DisableUserId() {
+	jas.disableUserId = true
 }
 
-func (jwtAuth *JwtAuthStrategyClass) SetHeaderName(headerName string) {
-	jwtAuth.headerName = headerName
+func (jas *JwtAuthStrategy) SetPubKey(pubKey string) {
+	jas.pubKey = pubKey
 }
 
-func (jwtAuth *JwtAuthStrategyClass) Execute(out _type.IApiSession, param interface{}) *go_error.ErrorInfo {
-	out.Logger().DebugF(`api-strategy %s trigger`, jwtAuth.GetName())
+func (jas *JwtAuthStrategy) SetHeaderName(headerName string) {
+	jas.headerName = headerName
+}
 
-	headerName := jwtAuth.headerName
+func (jas *JwtAuthStrategy) Execute(out _type.IApiSession, param interface{}) *go_error.ErrorInfo {
+	out.Logger().DebugF(`api-strategy %s trigger`, jas.GetName())
+
+	headerName := jas.headerName
 	if headerName == "" {
 		headerName = "Json-Web-Token"
 	}
 	out.SetJwtHeaderName(headerName)
 	jwt := out.Header(headerName)
 
-	verifyResult, token, err := go_jwt.Jwt.VerifyJwt(jwtAuth.pubKey, jwt, jwtAuth.noCheckExpire)
+	verifyResult, token, err := go_jwt.Jwt.VerifyJwt(jas.pubKey, jwt, jas.noCheckExpire)
 	if err != nil {
-		return go_error.WrapWithAll(errors.New(`Unauthorized`), jwtAuth.errorCode, nil)
+		return go_error.WrapWithAll(fmt.Errorf(jas.GetErrorMsg()), jas.GetErrorCode(), nil)
 	}
 	if !verifyResult {
-		return go_error.WrapWithAll(errors.New(`jwt verify error or jwt expired`), jwtAuth.errorCode, nil)
+		return go_error.WrapWithAll(fmt.Errorf(jas.GetErrorMsg()), jas.GetErrorCode(), nil)
 	}
 	jwtBody := token.Claims.(jwt2.MapClaims)
 	out.SetJwtBody(jwtBody)
-	if !jwtAuth.disableUserId {
+	if !jas.disableUserId {
 		jwtPayload := jwtBody[`payload`].(map[string]interface{})
 		if jwtPayload[`user_id`] == nil {
-			return go_error.WrapWithAll(errors.New(`jwt verify error, user_id not exist`), jwtAuth.errorCode, nil)
+			out.Logger().ErrorF(`jwt verify error, user_id not exist`)
+			return go_error.WrapWithAll(fmt.Errorf(jas.GetErrorMsg()), jas.GetErrorCode(), nil)
 		}
 
 		userId := go_reflect.Reflect.MustToUint64(jwtPayload[`user_id`])
@@ -93,9 +100,9 @@ func (jwtAuth *JwtAuthStrategyClass) Execute(out _type.IApiSession, param interf
 
 		errorMsg := out.Data(`error_msg`)
 		if errorMsg == nil {
-			out.SetData(`error_msg`, fmt.Sprintf("%s: %v\n", `jwtAuth`, userId))
+			out.SetData(`error_msg`, fmt.Sprintf("%s: %v\n", `jas`, userId))
 		} else {
-			out.SetData(`error_msg`, fmt.Sprintf("%s%s: %v\n", errorMsg.(string), `jwtAuth`, userId))
+			out.SetData(`error_msg`, fmt.Sprintf("%s%s: %v\n", errorMsg.(string), `jas`, userId))
 		}
 	}
 	return nil

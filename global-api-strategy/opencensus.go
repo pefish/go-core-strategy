@@ -20,29 +20,38 @@ import (
 	"time"
 )
 
-type OpenCensusClass struct {
+type GlobalOpenCensusStrategy struct {
 	errorCode uint64
+	errorMsg  string
 }
 
-var OpenCensusStrategy = OpenCensusClass{}
+var OpenCensusStrategyInstance = GlobalOpenCensusStrategy{}
 
-func (openCensus *OpenCensusClass) GetName() string {
+func (gocs *GlobalOpenCensusStrategy) GetName() string {
+	return `GlobalOpenCensusStrategy`
+}
+
+func (gocs *GlobalOpenCensusStrategy) GetDescription() string {
 	return `OpenCensus`
 }
 
-func (openCensus *OpenCensusClass) GetDescription() string {
-	return `OpenCensus`
+func (gocs *GlobalOpenCensusStrategy) SetErrorCode(code uint64) {
+	gocs.errorCode = code
 }
 
-func (openCensus *OpenCensusClass) SetErrorCode(code uint64) {
-	openCensus.errorCode = code
-}
-
-func (openCensus *OpenCensusClass) GetErrorCode() uint64 {
-	if openCensus.errorCode == 0 {
+func (gocs *GlobalOpenCensusStrategy) GetErrorCode() uint64 {
+	if gocs.errorCode == 0 {
 		return go_error.INTERNAL_ERROR_CODE
 	}
-	return openCensus.errorCode
+	return gocs.errorCode
+}
+
+func (gocs *GlobalOpenCensusStrategy) SetErrorMsg(msg string) {
+	gocs.errorMsg = msg
+}
+
+func (gocs *GlobalOpenCensusStrategy) GetErrorMsg() string {
+	return gocs.errorMsg
 }
 
 type OpenCensusStrategyParam struct {
@@ -51,9 +60,9 @@ type OpenCensusStrategyParam struct {
 	EnableStats       bool
 }
 
-func (openCensus *OpenCensusClass) Init(param interface{}) {
+func (gocs *GlobalOpenCensusStrategy) Init(param interface{}) {
 	if param == nil {
-		go_error.ThrowWithCode(errors.New(`OpenCensusStrategyParam must be set`), openCensus.GetErrorCode())
+		go_error.ThrowWithCode(errors.New(`OpenCensusStrategyParam must be set`), gocs.GetErrorCode())
 	}
 	go func() {
 		option := stackdriver.Options{
@@ -81,14 +90,14 @@ func (openCensus *OpenCensusClass) Init(param interface{}) {
 			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()}) // 每个请求一个trace，生产环境不要使用
 		}
 		select {
-		case <- go_application.Application.OnFinished():
+		case <-go_application.Application.OnFinished():
 			break
 		}
 	}()
 }
 
-func (openCensus *OpenCensusClass) Execute(out _type.IApiSession, param interface{}) *go_error.ErrorInfo {
-	out.Logger().DebugF(`api-strategy %s trigger`, openCensus.GetName())
+func (gocs *GlobalOpenCensusStrategy) Execute(out _type.IApiSession, param interface{}) *go_error.ErrorInfo {
+	out.Logger().DebugF(`api-strategy %s trigger`, gocs.GetName())
 	defer func() {
 		if err := recover(); err != nil {
 			out.Logger().Error(err)

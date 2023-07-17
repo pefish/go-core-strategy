@@ -1,22 +1,18 @@
 package api_strategy
 
 import (
-	"errors"
+	"fmt"
 	_type "github.com/pefish/go-core-type/api-session"
 
 	"github.com/pefish/go-error"
 )
 
-// Execute(out _type.IApiSession, param interface{}) *go_error.ErrorInfo
-//	GetName() string
-//	GetDescription() string
-//	GetErrorCode() uint64
-
-type IpFilterStrategyClass struct {
+type IpFilterStrategy struct {
 	errorCode uint64
+	errorMsg  string
 }
 
-var IpFilterStrategy = IpFilterStrategyClass{
+var IpFilterStrategyInstance = IpFilterStrategy{
 	errorCode: go_error.INTERNAL_ERROR_CODE,
 }
 
@@ -24,26 +20,38 @@ type IpFilterParam struct {
 	GetValidIp func(apiSession _type.IApiSession) []string
 }
 
-func (ipFilter *IpFilterStrategyClass) GetName() string {
-	return `ipFilter`
+func (ifs *IpFilterStrategy) GetName() string {
+	return `IpFilterStrategy`
 }
 
-func (ipFilter *IpFilterStrategyClass) GetDescription() string {
+func (ifs *IpFilterStrategy) GetDescription() string {
 	return `filter ip`
 }
 
-func (ipFilter *IpFilterStrategyClass) SetErrorCode(code uint64) {
-	ipFilter.errorCode = code
+func (ifs *IpFilterStrategy) SetErrorCode(code uint64) {
+	ifs.errorCode = code
 }
 
-func (ipFilter *IpFilterStrategyClass) GetErrorCode() uint64 {
-	return ipFilter.errorCode
+func (ifs *IpFilterStrategy) GetErrorCode() uint64 {
+	return ifs.errorCode
 }
 
-func (ipFilter *IpFilterStrategyClass) Execute(out _type.IApiSession, param interface{}) *go_error.ErrorInfo {
-	out.Logger().DebugF(`api-strategy %s trigger`, ipFilter.GetName())
+func (ifs *IpFilterStrategy) SetErrorMsg(msg string) {
+	ifs.errorMsg = msg
+}
+
+func (ifs *IpFilterStrategy) GetErrorMsg() string {
+	if ifs.errorMsg == "" {
+		return "Ip is baned."
+	}
+	return ifs.errorMsg
+}
+
+func (ifs *IpFilterStrategy) Execute(out _type.IApiSession, param interface{}) *go_error.ErrorInfo {
+	out.Logger().DebugF(`api-strategy %s trigger`, ifs.GetName())
 	if param == nil {
-		return go_error.WrapWithAll(errors.New(`strategy need param`), ipFilter.errorCode, nil)
+		out.Logger().ErrorF(`strategy need param`)
+		return go_error.WrapWithAll(fmt.Errorf(ifs.GetErrorMsg()), ifs.GetErrorCode(), nil)
 	}
 	newParam := param.(IpFilterParam)
 	if newParam.GetValidIp == nil {
@@ -56,5 +64,5 @@ func (ipFilter *IpFilterStrategyClass) Execute(out _type.IApiSession, param inte
 			return nil
 		}
 	}
-	return go_error.WrapWithAll(errors.New(`ip is baned`), ipFilter.errorCode, nil)
+	return go_error.WrapWithAll(fmt.Errorf(ifs.GetErrorMsg()), ifs.GetErrorCode(), nil)
 }

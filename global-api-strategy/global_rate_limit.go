@@ -9,36 +9,47 @@ import (
 	"time"
 )
 
-type GlobalRateLimitStrategyClass struct {
+type GlobalRateLimitStrategy struct {
 	tokenBucket chan struct{}
-	errorCode uint64
+	errorCode   uint64
+	errorMsg    string
 }
 
-var GlobalRateLimitStrategy = GlobalRateLimitStrategyClass{
+var GlobalRateLimitStrategyInstance = GlobalRateLimitStrategy{
 	tokenBucket: make(chan struct{}, 200),
 }
 
-func (globalRateLimit *GlobalRateLimitStrategyClass) GetName() string {
-	return `GlobalRateLimit`
+func (grls *GlobalRateLimitStrategy) GetName() string {
+	return `GlobalRateLimitStrategy`
 }
 
-func (globalRateLimit *GlobalRateLimitStrategyClass) GetDescription() string {
+func (grls *GlobalRateLimitStrategy) GetDescription() string {
 	return `global rate limit for all api`
 }
 
-func (globalRateLimit *GlobalRateLimitStrategyClass) SetErrorCode(code uint64) {
-	globalRateLimit.errorCode = code
+func (grls *GlobalRateLimitStrategy) SetErrorCode(code uint64) {
+	grls.errorCode = code
 }
 
-func (globalRateLimit *GlobalRateLimitStrategyClass) GetErrorCode() uint64 {
-	if globalRateLimit.errorCode == 0 {
+func (grls *GlobalRateLimitStrategy) SetErrorMsg(msg string) {
+	grls.errorMsg = msg
+}
+
+func (grls *GlobalRateLimitStrategy) GetErrorMsg() string {
+	if grls.errorMsg == "" {
+		return "Global rate limit."
+	}
+	return grls.errorMsg
+}
+
+func (grls *GlobalRateLimitStrategy) GetErrorCode() uint64 {
+	if grls.errorCode == 0 {
 		return go_error.INTERNAL_ERROR_CODE
 	}
-	return globalRateLimit.errorCode
+	return grls.errorCode
 }
 
-
-func (globalRateLimit *GlobalRateLimitStrategyClass) Init(param interface{}) {
+func (grls *GlobalRateLimitStrategy) Init(param interface{}) {
 	go func() {
 		params := param.(GlobalRateLimitStrategyParam)
 		ticker := time.NewTicker(params.FillInterval)
@@ -47,10 +58,10 @@ func (globalRateLimit *GlobalRateLimitStrategyClass) Init(param interface{}) {
 			select {
 			case <-ticker.C:
 				select {
-				case globalRateLimit.tokenBucket <- struct{}{}:
+				case grls.tokenBucket <- struct{}{}:
 				default:
 				}
-			case <- go_application.Application.OnFinished():
+			case <-go_application.Application.OnFinished():
 				return
 			}
 		}
@@ -58,35 +69,35 @@ func (globalRateLimit *GlobalRateLimitStrategyClass) Init(param interface{}) {
 }
 
 type GlobalRateLimitStrategyParam struct {
-	FillInterval time.Duration  // 每这么长时间往令牌桶塞一个令牌
+	FillInterval time.Duration // 每这么长时间往令牌桶塞一个令牌
 }
 
-func (globalRateLimit *GlobalRateLimitStrategyClass) Execute(out _type.IApiSession, param interface{}) *go_error.ErrorInfo {
-	out.Logger().DebugF(`api-strategy %s trigger`, globalRateLimit.GetName())
+func (grls *GlobalRateLimitStrategy) Execute(out _type.IApiSession, param interface{}) *go_error.ErrorInfo {
+	out.Logger().DebugF(`api-strategy %s trigger`, grls.GetName())
 
-	succ := globalRateLimit.takeAvailable(out, false)
+	succ := grls.takeAvailable(out, false)
 	if !succ {
-		return go_error.WrapWithAll(errors.New(`global rate limit`), globalRateLimit.errorCode, nil)
+		return go_error.WrapWithAll(errors.New(grls.GetErrorMsg()), grls.GetErrorCode(), nil)
 	}
 
 	return nil
 }
 
-func (globalRateLimit *GlobalRateLimitStrategyClass) takeAvailable(out _type.IApiSession, block bool) bool{
+func (grls *GlobalRateLimitStrategy) takeAvailable(out _type.IApiSession, block bool) bool {
 	var takenResult bool
 	if block {
 		select {
-		case <-globalRateLimit.tokenBucket:
+		case <-grls.tokenBucket:
 			takenResult = true
 		}
 	} else {
 		select {
-		case <-globalRateLimit.tokenBucket:
+		case <-grls.tokenBucket:
 			takenResult = true
 		default:
 			takenResult = false
 		}
 	}
-	out.Logger().DebugF("current global rate limit token count: %d", len(globalRateLimit.tokenBucket))
+	out.Logger().DebugF("current global rate limit token count: %d", len(grls.tokenBucket))
 	return takenResult
 }
