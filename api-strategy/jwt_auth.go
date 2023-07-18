@@ -18,12 +18,10 @@ type JwtAuthStrategy struct {
 	errorMsg      string
 }
 
-var JwtAuthApiStrategyInstance = JwtAuthStrategy{
-	errorCode: go_error.INTERNAL_ERROR_CODE,
-	errorMsg:  `Unauthorized`,
-}
+var JwtAuthApiStrategyInstance = NewJwtAuthStrategy()
 
-type JwtAuthParam struct {
+func NewJwtAuthStrategy() *JwtAuthStrategy {
+	return &JwtAuthStrategy{}
 }
 
 func (jas *JwtAuthStrategy) GetName() string {
@@ -34,12 +32,14 @@ func (jas *JwtAuthStrategy) GetDescription() string {
 	return `jwt auth`
 }
 
-func (jas *JwtAuthStrategy) SetErrorCode(code uint64) {
+func (jas *JwtAuthStrategy) SetErrorCode(code uint64) IStrategy {
 	jas.errorCode = code
+	return jas
 }
 
-func (jas *JwtAuthStrategy) SetErrorMsg(msg string) {
+func (jas *JwtAuthStrategy) SetErrorMsg(msg string) IStrategy {
 	jas.errorMsg = msg
+	return jas
 }
 
 func (jas *JwtAuthStrategy) GetErrorMsg() string {
@@ -50,6 +50,9 @@ func (jas *JwtAuthStrategy) GetErrorMsg() string {
 }
 
 func (jas *JwtAuthStrategy) GetErrorCode() uint64 {
+	if jas.errorCode == 0 {
+		return go_error.INTERNAL_ERROR_CODE
+	}
 	return jas.errorCode
 }
 

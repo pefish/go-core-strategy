@@ -12,8 +12,10 @@ type IpFilterStrategy struct {
 	errorMsg  string
 }
 
-var IpFilterStrategyInstance = IpFilterStrategy{
-	errorCode: go_error.INTERNAL_ERROR_CODE,
+var IpFilterStrategyInstance = NewIpFilterStrategy()
+
+func NewIpFilterStrategy() *IpFilterStrategy {
+	return &IpFilterStrategy{}
 }
 
 type IpFilterParam struct {
@@ -28,16 +30,21 @@ func (ifs *IpFilterStrategy) GetDescription() string {
 	return `filter ip`
 }
 
-func (ifs *IpFilterStrategy) SetErrorCode(code uint64) {
+func (ifs *IpFilterStrategy) SetErrorCode(code uint64) IStrategy {
 	ifs.errorCode = code
+	return ifs
 }
 
 func (ifs *IpFilterStrategy) GetErrorCode() uint64 {
+	if ifs.errorCode == 0 {
+		return go_error.INTERNAL_ERROR_CODE
+	}
 	return ifs.errorCode
 }
 
-func (ifs *IpFilterStrategy) SetErrorMsg(msg string) {
+func (ifs *IpFilterStrategy) SetErrorMsg(msg string) IStrategy {
 	ifs.errorMsg = msg
+	return ifs
 }
 
 func (ifs *IpFilterStrategy) GetErrorMsg() string {

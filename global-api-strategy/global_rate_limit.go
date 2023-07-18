@@ -15,8 +15,12 @@ type GlobalRateLimitStrategy struct {
 	errorMsg    string
 }
 
-var GlobalRateLimitStrategyInstance = GlobalRateLimitStrategy{
-	tokenBucket: make(chan struct{}, 200),
+var GlobalRateLimitStrategyInstance = NewGlobalRateLimitStrategy()
+
+func NewGlobalRateLimitStrategy() *GlobalRateLimitStrategy {
+	return &GlobalRateLimitStrategy{
+		tokenBucket: make(chan struct{}, 200),
+	}
 }
 
 func (grls *GlobalRateLimitStrategy) GetName() string {
@@ -27,12 +31,14 @@ func (grls *GlobalRateLimitStrategy) GetDescription() string {
 	return `global rate limit for all api`
 }
 
-func (grls *GlobalRateLimitStrategy) SetErrorCode(code uint64) {
+func (grls *GlobalRateLimitStrategy) SetErrorCode(code uint64) IGlobalStrategy {
 	grls.errorCode = code
+	return grls
 }
 
-func (grls *GlobalRateLimitStrategy) SetErrorMsg(msg string) {
+func (grls *GlobalRateLimitStrategy) SetErrorMsg(msg string) IGlobalStrategy {
 	grls.errorMsg = msg
+	return grls
 }
 
 func (grls *GlobalRateLimitStrategy) GetErrorMsg() string {
