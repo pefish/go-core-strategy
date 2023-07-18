@@ -2,7 +2,8 @@ package api_strategy
 
 import (
 	"fmt"
-	_type "github.com/pefish/go-core-type/api-session"
+	api_session "github.com/pefish/go-core-type/api-session"
+	api_strategy "github.com/pefish/go-core-type/api-strategy"
 
 	"github.com/pefish/go-error"
 )
@@ -19,7 +20,7 @@ func NewIpFilterStrategy() *IpFilterStrategy {
 }
 
 type IpFilterParam struct {
-	GetValidIp func(apiSession _type.IApiSession) []string
+	GetValidIp func(apiSession api_session.IApiSession) []string
 }
 
 func (ifs *IpFilterStrategy) GetName() string {
@@ -30,7 +31,7 @@ func (ifs *IpFilterStrategy) GetDescription() string {
 	return `filter ip`
 }
 
-func (ifs *IpFilterStrategy) SetErrorCode(code uint64) IStrategy {
+func (ifs *IpFilterStrategy) SetErrorCode(code uint64) api_strategy.IApiStrategy {
 	ifs.errorCode = code
 	return ifs
 }
@@ -42,7 +43,7 @@ func (ifs *IpFilterStrategy) GetErrorCode() uint64 {
 	return ifs.errorCode
 }
 
-func (ifs *IpFilterStrategy) SetErrorMsg(msg string) IStrategy {
+func (ifs *IpFilterStrategy) SetErrorMsg(msg string) api_strategy.IApiStrategy {
 	ifs.errorMsg = msg
 	return ifs
 }
@@ -54,7 +55,7 @@ func (ifs *IpFilterStrategy) GetErrorMsg() string {
 	return ifs.errorMsg
 }
 
-func (ifs *IpFilterStrategy) Execute(out _type.IApiSession, param interface{}) *go_error.ErrorInfo {
+func (ifs *IpFilterStrategy) Execute(out api_session.IApiSession, param interface{}) *go_error.ErrorInfo {
 	out.Logger().DebugF(`api-strategy %s trigger`, ifs.GetName())
 	if param == nil {
 		out.Logger().ErrorF(`strategy need param`)

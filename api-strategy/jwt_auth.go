@@ -3,7 +3,8 @@ package api_strategy
 import (
 	"fmt"
 	jwt2 "github.com/dgrijalva/jwt-go"
-	_type "github.com/pefish/go-core-type/api-session"
+	api_session "github.com/pefish/go-core-type/api-session"
+	api_strategy "github.com/pefish/go-core-type/api-strategy"
 	"github.com/pefish/go-error"
 	"github.com/pefish/go-jwt"
 	"github.com/pefish/go-reflect"
@@ -32,12 +33,12 @@ func (jas *JwtAuthStrategy) GetDescription() string {
 	return `jwt auth`
 }
 
-func (jas *JwtAuthStrategy) SetErrorCode(code uint64) IStrategy {
+func (jas *JwtAuthStrategy) SetErrorCode(code uint64) api_strategy.IApiStrategy {
 	jas.errorCode = code
 	return jas
 }
 
-func (jas *JwtAuthStrategy) SetErrorMsg(msg string) IStrategy {
+func (jas *JwtAuthStrategy) SetErrorMsg(msg string) api_strategy.IApiStrategy {
 	jas.errorMsg = msg
 	return jas
 }
@@ -72,7 +73,7 @@ func (jas *JwtAuthStrategy) SetHeaderName(headerName string) {
 	jas.headerName = headerName
 }
 
-func (jas *JwtAuthStrategy) Execute(out _type.IApiSession, param interface{}) *go_error.ErrorInfo {
+func (jas *JwtAuthStrategy) Execute(out api_session.IApiSession, param interface{}) *go_error.ErrorInfo {
 	out.Logger().DebugF(`api-strategy %s trigger`, jas.GetName())
 
 	headerName := jas.headerName

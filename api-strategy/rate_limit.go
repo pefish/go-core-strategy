@@ -3,7 +3,8 @@ package api_strategy
 import (
 	"fmt"
 	go_application "github.com/pefish/go-application"
-	_type "github.com/pefish/go-core-type/api-session"
+	api_session "github.com/pefish/go-core-type/api-session"
+	api_strategy "github.com/pefish/go-core-type/api-strategy"
 	"time"
 
 	"github.com/pefish/go-error"
@@ -50,7 +51,7 @@ func (rls *RateLimitStrategy) GetDescription() string {
 	return `rate limit`
 }
 
-func (rls *RateLimitStrategy) SetErrorCode(code uint64) IStrategy {
+func (rls *RateLimitStrategy) SetErrorCode(code uint64) api_strategy.IApiStrategy {
 	rls.errorCode = code
 	return rls
 }
@@ -62,7 +63,7 @@ func (rls *RateLimitStrategy) GetErrorCode() uint64 {
 	return rls.errorCode
 }
 
-func (rls *RateLimitStrategy) SetErrorMsg(msg string) IStrategy {
+func (rls *RateLimitStrategy) SetErrorMsg(msg string) api_strategy.IApiStrategy {
 	rls.errorMsg = msg
 	return rls
 }
@@ -74,7 +75,7 @@ func (rls *RateLimitStrategy) GetErrorMsg() string {
 	return rls.errorMsg
 }
 
-func (rls *RateLimitStrategy) Execute(out _type.IApiSession, param interface{}) *go_error.ErrorInfo {
+func (rls *RateLimitStrategy) Execute(out api_session.IApiSession, param interface{}) *go_error.ErrorInfo {
 	out.Logger().DebugF(`api-strategy %s trigger`, rls.GetName())
 	out.Logger().Error(rls)
 	succ := rls.takeAvailable(out, false)
@@ -85,7 +86,7 @@ func (rls *RateLimitStrategy) Execute(out _type.IApiSession, param interface{}) 
 	return nil
 }
 
-func (rls *RateLimitStrategy) takeAvailable(out _type.IApiSession, block bool) bool {
+func (rls *RateLimitStrategy) takeAvailable(out api_session.IApiSession, block bool) bool {
 	var takenResult bool
 	if block {
 		select {

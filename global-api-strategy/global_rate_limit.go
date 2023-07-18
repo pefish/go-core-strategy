@@ -5,6 +5,7 @@ import (
 	"errors"
 	go_application "github.com/pefish/go-application"
 	_type "github.com/pefish/go-core-type/api-session"
+	global_api_strategy "github.com/pefish/go-core-type/global-api-strategy"
 	"github.com/pefish/go-error"
 	"time"
 )
@@ -31,12 +32,12 @@ func (grls *GlobalRateLimitStrategy) GetDescription() string {
 	return `global rate limit for all api`
 }
 
-func (grls *GlobalRateLimitStrategy) SetErrorCode(code uint64) IGlobalStrategy {
+func (grls *GlobalRateLimitStrategy) SetErrorCode(code uint64) global_api_strategy.IGlobalApiStrategy {
 	grls.errorCode = code
 	return grls
 }
 
-func (grls *GlobalRateLimitStrategy) SetErrorMsg(msg string) IGlobalStrategy {
+func (grls *GlobalRateLimitStrategy) SetErrorMsg(msg string) global_api_strategy.IGlobalApiStrategy {
 	grls.errorMsg = msg
 	return grls
 }

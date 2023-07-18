@@ -6,8 +6,8 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/golang/mock v1.5.0
 	github.com/pefish/go-application v0.1.4
-	github.com/pefish/go-core-type v0.0.6
-	github.com/pefish/go-error v1.0.4
+	github.com/pefish/go-core-type v0.1.0
+	github.com/pefish/go-error v1.0.7
 	github.com/pefish/go-jwt v0.3.3
 	github.com/pefish/go-logger v0.4.16
 	github.com/pefish/go-reflect v0.2.2
