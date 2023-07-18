@@ -3,12 +3,11 @@ module github.com/pefish/go-core-strategy
 go 1.20
 
 require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/golang/mock v1.5.0
 	github.com/pefish/go-application v0.1.4
 	github.com/pefish/go-core-type v0.1.0
 	github.com/pefish/go-error v1.0.7
-	github.com/pefish/go-jwt v0.3.3
+	github.com/pefish/go-jwt v0.3.4
 	github.com/pefish/go-logger v0.4.16
 	github.com/pefish/go-reflect v0.2.2
 	github.com/pefish/go-test-assert v0.0.1
@@ -16,6 +15,7 @@ require (
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
+	github.com/golang-jwt/jwt/v5 v5.0.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.6.1 // indirect
 	go.uber.org/atomic v1.5.0 // indirect

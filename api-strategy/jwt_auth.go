@@ -2,7 +2,6 @@ package api_strategy
 
 import (
 	"fmt"
-	jwt2 "github.com/dgrijalva/jwt-go"
 	api_session "github.com/pefish/go-core-type/api-session"
 	api_strategy "github.com/pefish/go-core-type/api-strategy"
 	"github.com/pefish/go-error"
@@ -83,17 +82,16 @@ func (jas *JwtAuthStrategy) Execute(out api_session.IApiSession, param interface
 	out.SetJwtHeaderName(headerName)
 	jwt := out.Header(headerName)
 
-	verifyResult, token, err := go_jwt.Jwt.VerifyJwt(jas.pubKey, jwt, jas.noCheckExpire)
+	verifyResult, _, body, err := go_jwt.Jwt.VerifyJwt(jas.pubKey, jwt, jas.noCheckExpire)
 	if err != nil {
 		return go_error.WrapWithAll(fmt.Errorf(jas.GetErrorMsg()), jas.GetErrorCode(), nil)
 	}
 	if !verifyResult {
 		return go_error.WrapWithAll(fmt.Errorf(jas.GetErrorMsg()), jas.GetErrorCode(), nil)
 	}
-	jwtBody := token.Claims.(jwt2.MapClaims)
-	out.SetJwtBody(jwtBody)
+	out.SetJwtBody(body)
 	if !jas.disableUserId {
-		jwtPayload := jwtBody[`payload`].(map[string]interface{})
+		jwtPayload := body[`payload`].(map[string]interface{})
 		if jwtPayload[`user_id`] == nil {
 			out.Logger().ErrorF(`jwt verify error, user_id not exist`)
 			return go_error.WrapWithAll(fmt.Errorf(jas.GetErrorMsg()), jas.GetErrorCode(), nil)
