@@ -100,6 +100,6 @@ func (rls *RateLimitStrategy) takeAvailable(out api_session.IApiSession, block b
 			takenResult = false
 		}
 	}
-	out.Logger().DebugF("current global rate limit token count: %d", len(rls.tokenBucket))
+	out.Logger().DebugF("current rate limit token count: %d", len(rls.tokenBucket))
 	return takenResult
 }
