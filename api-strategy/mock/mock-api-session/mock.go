@@ -21,26 +21,6 @@ type MockIApiSession struct {
 	recorder *MockIApiSessionMockRecorder
 }
 
-func (m *MockIApiSession) SetPathVars(vars map[string]string) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (m *MockIApiSession) PathVars() map[string]string {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (m *MockIApiSession) Redirect(url string) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (m *MockIApiSession) Host() string {
-	//TODO implement me
-	panic("implement me")
-}
-
 // MockIApiSessionMockRecorder is the mock recorder for MockIApiSession.
 type MockIApiSessionMockRecorder struct {
 	mock *MockIApiSession
@@ -169,6 +149,20 @@ func (mr *MockIApiSessionMockRecorder) Header(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Header", reflect.TypeOf((*MockIApiSession)(nil).Header), arg0)
 }
 
+// Host mocks base method.
+func (m *MockIApiSession) Host() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Host")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Host indicates an expected call of Host.
+func (mr *MockIApiSessionMockRecorder) Host() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Host", reflect.TypeOf((*MockIApiSession)(nil).Host))
+}
+
 // JwtBody mocks base method.
 func (m *MockIApiSession) JwtBody() map[string]interface{} {
 	m.ctrl.T.Helper()
@@ -239,6 +233,18 @@ func (mr *MockIApiSessionMockRecorder) Method() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Method", reflect.TypeOf((*MockIApiSession)(nil).Method))
 }
 
+// MustScanParams mocks base method.
+func (m *MockIApiSession) MustScanParams(arg0 interface{}) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "MustScanParams", arg0)
+}
+
+// MustScanParams indicates an expected call of MustScanParams.
+func (mr *MockIApiSessionMockRecorder) MustScanParams(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MustScanParams", reflect.TypeOf((*MockIApiSession)(nil).MustScanParams), arg0)
+}
+
 // OriginalParams mocks base method.
 func (m *MockIApiSession) OriginalParams() map[string]interface{} {
 	m.ctrl.T.Helper()
@@ -281,6 +287,20 @@ func (mr *MockIApiSessionMockRecorder) Path() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Path", reflect.TypeOf((*MockIApiSession)(nil).Path))
 }
 
+// PathVars mocks base method.
+func (m *MockIApiSession) PathVars() map[string]string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PathVars")
+	ret0, _ := ret[0].(map[string]string)
+	return ret0
+}
+
+// PathVars indicates an expected call of PathVars.
+func (mr *MockIApiSessionMockRecorder) PathVars() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PathVars", reflect.TypeOf((*MockIApiSession)(nil).PathVars))
+}
+
 // ReadJSON mocks base method.
 func (m *MockIApiSession) ReadJSON(arg0 interface{}) error {
 	m.ctrl.T.Helper()
@@ -293,6 +313,18 @@ func (m *MockIApiSession) ReadJSON(arg0 interface{}) error {
 func (mr *MockIApiSessionMockRecorder) ReadJSON(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReadJSON", reflect.TypeOf((*MockIApiSession)(nil).ReadJSON), arg0)
+}
+
+// Redirect mocks base method.
+func (m *MockIApiSession) Redirect(arg0 string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Redirect", arg0)
+}
+
+// Redirect indicates an expected call of Redirect.
+func (mr *MockIApiSessionMockRecorder) Redirect(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Redirect", reflect.TypeOf((*MockIApiSession)(nil).Redirect), arg0)
 }
 
 // RemoteAddress mocks base method.
@@ -338,9 +370,11 @@ func (mr *MockIApiSessionMockRecorder) ResponseWriter() *gomock.Call {
 }
 
 // ScanParams mocks base method.
-func (m *MockIApiSession) ScanParams(arg0 interface{}) {
+func (m *MockIApiSession) ScanParams(arg0 interface{}) error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "ScanParams", arg0)
+	ret := m.ctrl.Call(m, "ScanParams", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // ScanParams indicates an expected call of ScanParams.
@@ -455,6 +489,18 @@ func (m *MockIApiSession) SetParams(arg0 map[string]interface{}) {
 func (mr *MockIApiSessionMockRecorder) SetParams(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetParams", reflect.TypeOf((*MockIApiSession)(nil).SetParams), arg0)
+}
+
+// SetPathVars mocks base method.
+func (m *MockIApiSession) SetPathVars(arg0 map[string]string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetPathVars", arg0)
+}
+
+// SetPathVars indicates an expected call of SetPathVars.
+func (mr *MockIApiSessionMockRecorder) SetPathVars(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetPathVars", reflect.TypeOf((*MockIApiSession)(nil).SetPathVars), arg0)
 }
 
 // SetRequest mocks base method.

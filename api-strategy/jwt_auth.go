@@ -82,7 +82,7 @@ func (jas *JwtAuthStrategy) Execute(out api_session.IApiSession, param interface
 	out.SetJwtHeaderName(headerName)
 	jwt := out.Header(headerName)
 
-	verifyResult, _, body, err := go_jwt.Jwt.VerifyJwt(jas.pubKey, jwt, jas.noCheckExpire)
+	verifyResult, _, body, err := go_jwt.JwtInstance.VerifyJwt(jas.pubKey, jwt, jas.noCheckExpire)
 	if err != nil {
 		return go_error.WrapWithAll(fmt.Errorf(jas.GetErrorMsg()), jas.GetErrorCode(), nil)
 	}

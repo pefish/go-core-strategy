@@ -6,7 +6,7 @@ import (
 	_type "github.com/pefish/go-core-type/api-session"
 	go_error "github.com/pefish/go-error"
 	go_logger "github.com/pefish/go-logger"
-	"github.com/pefish/go-test-assert"
+	go_test_ "github.com/pefish/go-test"
 	"testing"
 )
 
@@ -15,14 +15,19 @@ func TestIpFilterStrategyClass_Execute(t *testing.T) {
 	apiSessionInstance := mock_api_session.NewMockIApiSession(ctrl)
 	apiSessionInstance.EXPECT().RemoteAddress().Return("127.0.0.34").AnyTimes()
 	apiSessionInstance.EXPECT().Logger().Return(go_logger.Logger).AnyTimes()
-	err := IpFilterStrategy.Execute(apiSessionInstance, IpFilterParam{GetValidIp: func(apiSession _type.IApiSession) []string {
-		return []string{"127.0.0.34"}
-	}})
-	test.Equal(t, (*go_error.ErrorInfo)(nil), err)
+	err := IpFilterStrategyInstance.Execute(
+		apiSessionInstance,
+		IpFilterParam{
+			GetValidIp: func(apiSession _type.IApiSession) []string {
+				return []string{"127.0.0.34"}
+			},
+		},
+	)
+	go_test_.Equal(t, (*go_error.ErrorInfo)(nil), err)
 
-	err = IpFilterStrategy.Execute(apiSessionInstance, IpFilterParam{GetValidIp: func(apiSession _type.IApiSession) []string {
+	err = IpFilterStrategyInstance.Execute(apiSessionInstance, IpFilterParam{GetValidIp: func(apiSession _type.IApiSession) []string {
 		return []string{"127.0.0.1"}
 	}})
-	test.Equal(t, IpFilterStrategy.GetErrorCode(), err.Code)
-	test.Equal(t, "ip is baned", err.Err.Error())
+	go_test_.Equal(t, IpFilterStrategyInstance.GetErrorCode(), err.Code)
+	go_test_.Equal(t, "Ip is baned.", err.Err.Error())
 }
