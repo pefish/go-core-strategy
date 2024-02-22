@@ -7,12 +7,14 @@ import (
 
 	api_session "github.com/pefish/go-core-type/api-session"
 	api_strategy "github.com/pefish/go-core-type/api-strategy"
+	go_logger "github.com/pefish/go-logger"
 
 	go_error "github.com/pefish/go-error"
 )
 
 type RateLimitStrategy struct {
 	ctx            context.Context
+	logger         go_logger.InterfaceLogger
 	errorCode      uint64
 	errorMsg       string
 	secondPerToken time.Duration
@@ -21,11 +23,13 @@ type RateLimitStrategy struct {
 
 func NewRateLimitStrategy(
 	ctx context.Context,
+	logger go_logger.InterfaceLogger,
 	secondPerToken time.Duration,
 	maxTokenCount int,
 ) *RateLimitStrategy {
 	return &RateLimitStrategy{
 		ctx:            ctx,
+		logger:         logger,
 		secondPerToken: secondPerToken,
 		tokenBucket:    make(chan struct{}, maxTokenCount),
 	}
@@ -40,6 +44,7 @@ func (rls *RateLimitStrategy) Init(param interface{}) api_strategy.IApiStrategy 
 			case <-timer.C:
 				select {
 				case rls.tokenBucket <- struct{}{}:
+					rls.logger.DebugF("[%s] New token to bocket.", rls.Name())
 				default:
 				}
 				timer.Reset(rls.secondPerToken)
