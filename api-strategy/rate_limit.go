@@ -89,7 +89,7 @@ func (rls *RateLimitStrategy) ErrorMsg() string {
 }
 
 func (rls *RateLimitStrategy) Execute(out api_session.IApiSession, param interface{}) *go_error.ErrorInfo {
-	out.Logger().DebugF(`api-strategy %s trigger`, rls.Name())
+	rls.logger.DebugF(`Api-strategy %s trigger.`, rls.Name())
 	succ := rls.takeAvailable(out, false)
 	if !succ {
 		return go_error.WrapWithAll(fmt.Errorf(rls.ErrorMsg()), rls.ErrorCode(), nil)
@@ -113,6 +113,6 @@ func (rls *RateLimitStrategy) takeAvailable(out api_session.IApiSession, block b
 			takenResult = false
 		}
 	}
-	out.Logger().DebugF("current rate limit token count: %d, takenResult: %t", len(rls.tokenBucket), takenResult)
+	rls.logger.DebugF("Current rate limit token count: %d, takenResult: %t", len(rls.tokenBucket), takenResult)
 	return takenResult
 }
