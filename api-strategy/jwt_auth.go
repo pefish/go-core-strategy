@@ -24,11 +24,15 @@ func NewJwtAuthStrategy() *JwtAuthStrategy {
 	return &JwtAuthStrategy{}
 }
 
-func (jas *JwtAuthStrategy) GetName() string {
+func (jas *JwtAuthStrategy) Init(param interface{}) {
+
+}
+
+func (jas *JwtAuthStrategy) Name() string {
 	return `JwtAuthStrategy`
 }
 
-func (jas *JwtAuthStrategy) GetDescription() string {
+func (jas *JwtAuthStrategy) Description() string {
 	return `jwt auth`
 }
 
@@ -42,14 +46,14 @@ func (jas *JwtAuthStrategy) SetErrorMsg(msg string) api_strategy.IApiStrategy {
 	return jas
 }
 
-func (jas *JwtAuthStrategy) GetErrorMsg() string {
+func (jas *JwtAuthStrategy) ErrorMsg() string {
 	if jas.errorMsg == "" {
 		return "Unauthorized."
 	}
 	return jas.errorMsg
 }
 
-func (jas *JwtAuthStrategy) GetErrorCode() uint64 {
+func (jas *JwtAuthStrategy) ErrorCode() uint64 {
 	if jas.errorCode == 0 {
 		return go_error.INTERNAL_ERROR_CODE
 	}
@@ -73,7 +77,7 @@ func (jas *JwtAuthStrategy) SetHeaderName(headerName string) {
 }
 
 func (jas *JwtAuthStrategy) Execute(out api_session.IApiSession, param interface{}) *go_error.ErrorInfo {
-	out.Logger().DebugF(`api-strategy %s trigger`, jas.GetName())
+	out.Logger().DebugF(`api-strategy %s trigger`, jas.Name())
 
 	headerName := jas.headerName
 	if headerName == "" {
@@ -84,17 +88,17 @@ func (jas *JwtAuthStrategy) Execute(out api_session.IApiSession, param interface
 
 	verifyResult, _, body, err := go_jwt.JwtInstance.VerifyJwt(jas.pubKey, jwt, jas.noCheckExpire)
 	if err != nil {
-		return go_error.WrapWithAll(fmt.Errorf(jas.GetErrorMsg()), jas.GetErrorCode(), nil)
+		return go_error.WrapWithAll(fmt.Errorf(jas.ErrorMsg()), jas.ErrorCode(), nil)
 	}
 	if !verifyResult {
-		return go_error.WrapWithAll(fmt.Errorf(jas.GetErrorMsg()), jas.GetErrorCode(), nil)
+		return go_error.WrapWithAll(fmt.Errorf(jas.ErrorMsg()), jas.ErrorCode(), nil)
 	}
 	out.SetJwtBody(body)
 	if !jas.disableUserId {
 		jwtPayload := body[`payload`].(map[string]interface{})
 		if jwtPayload[`user_id`] == nil {
 			out.Logger().ErrorF(`jwt verify error, user_id not exist`)
-			return go_error.WrapWithAll(fmt.Errorf(jas.GetErrorMsg()), jas.GetErrorCode(), nil)
+			return go_error.WrapWithAll(fmt.Errorf(jas.ErrorMsg()), jas.ErrorCode(), nil)
 		}
 
 		userId := go_reflect.Reflect.MustToUint64(jwtPayload[`user_id`])

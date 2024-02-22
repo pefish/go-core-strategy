@@ -24,7 +24,7 @@ func TestJwtAuthStrategyClass_Execute(t *testing.T) {
 	apiSessionInstance.EXPECT().SetJwtHeaderName(gomock.Any()).AnyTimes()
 	JwtAuthApiStrategyInstance.SetHeaderName("jwt")
 	err := JwtAuthApiStrategyInstance.Execute(apiSessionInstance, nil)
-	go_test_.Equal(t, JwtAuthApiStrategyInstance.GetErrorCode(), err.Code)
+	go_test_.Equal(t, JwtAuthApiStrategyInstance.ErrorCode(), err.Code)
 	go_test_.Equal(t, "Unauthorized.", err.Err.Error())
 
 	pkey, pubkey, err1 := go_jwt.GeneRsaKeyPair()

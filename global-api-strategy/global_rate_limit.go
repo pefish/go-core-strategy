@@ -2,54 +2,57 @@
 package global_api_strategy
 
 import (
+	"context"
 	"errors"
-	go_application "github.com/pefish/go-application"
-	_type "github.com/pefish/go-core-type/api-session"
-	global_api_strategy "github.com/pefish/go-core-type/global-api-strategy"
-	"github.com/pefish/go-error"
 	"time"
+
+	_type "github.com/pefish/go-core-type/api-session"
+	api_strategy "github.com/pefish/go-core-type/api-strategy"
+	go_error "github.com/pefish/go-error"
 )
 
 type GlobalRateLimitStrategy struct {
+	ctx         context.Context
 	tokenBucket chan struct{}
 	errorCode   uint64
 	errorMsg    string
 }
 
-var GlobalRateLimitStrategyInstance = NewGlobalRateLimitStrategy()
+var GlobalRateLimitStrategyInstance = NewGlobalRateLimitStrategy(context.Background())
 
-func NewGlobalRateLimitStrategy() *GlobalRateLimitStrategy {
+func NewGlobalRateLimitStrategy(ctx context.Context) *GlobalRateLimitStrategy {
 	return &GlobalRateLimitStrategy{
+		ctx:         ctx,
 		tokenBucket: make(chan struct{}, 200),
 	}
 }
 
-func (grls *GlobalRateLimitStrategy) GetName() string {
+func (grls *GlobalRateLimitStrategy) Name() string {
 	return `GlobalRateLimitStrategy`
 }
 
-func (grls *GlobalRateLimitStrategy) GetDescription() string {
+func (grls *GlobalRateLimitStrategy) Description() string {
 	return `global rate limit for all api`
 }
 
-func (grls *GlobalRateLimitStrategy) SetErrorCode(code uint64) global_api_strategy.IGlobalApiStrategy {
+func (grls *GlobalRateLimitStrategy) SetErrorCode(code uint64) api_strategy.IApiStrategy {
 	grls.errorCode = code
 	return grls
 }
 
-func (grls *GlobalRateLimitStrategy) SetErrorMsg(msg string) global_api_strategy.IGlobalApiStrategy {
+func (grls *GlobalRateLimitStrategy) SetErrorMsg(msg string) api_strategy.IApiStrategy {
 	grls.errorMsg = msg
 	return grls
 }
 
-func (grls *GlobalRateLimitStrategy) GetErrorMsg() string {
+func (grls *GlobalRateLimitStrategy) ErrorMsg() string {
 	if grls.errorMsg == "" {
 		return "Global rate limit."
 	}
 	return grls.errorMsg
 }
 
-func (grls *GlobalRateLimitStrategy) GetErrorCode() uint64 {
+func (grls *GlobalRateLimitStrategy) ErrorCode() uint64 {
 	if grls.errorCode == 0 {
 		return go_error.INTERNAL_ERROR_CODE
 	}
@@ -68,7 +71,7 @@ func (grls *GlobalRateLimitStrategy) Init(param interface{}) {
 				case grls.tokenBucket <- struct{}{}:
 				default:
 				}
-			case <-go_application.Application.OnFinished():
+			case <-grls.ctx.Done():
 				return
 			}
 		}
@@ -80,11 +83,11 @@ type GlobalRateLimitStrategyParam struct {
 }
 
 func (grls *GlobalRateLimitStrategy) Execute(out _type.IApiSession, param interface{}) *go_error.ErrorInfo {
-	out.Logger().DebugF(`api-strategy %s trigger`, grls.GetName())
+	out.Logger().DebugF(`api-strategy %s trigger`, grls.Name())
 
 	succ := grls.takeAvailable(out, false)
 	if !succ {
-		return go_error.WrapWithAll(errors.New(grls.GetErrorMsg()), grls.GetErrorCode(), nil)
+		return go_error.WrapWithAll(errors.New(grls.ErrorMsg()), grls.ErrorCode(), nil)
 	}
 
 	return nil

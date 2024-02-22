@@ -1,53 +1,62 @@
 package api_strategy
 
 import (
+	"context"
 	"fmt"
-	go_application "github.com/pefish/go-application"
-	api_session "github.com/pefish/go-core-type/api-session"
-	api_strategy "github.com/pefish/go-core-type/api-strategy"
 	"time"
 
-	"github.com/pefish/go-error"
+	api_session "github.com/pefish/go-core-type/api-session"
+	api_strategy "github.com/pefish/go-core-type/api-strategy"
+
+	go_error "github.com/pefish/go-error"
 )
 
 type RateLimitStrategy struct {
+	ctx            context.Context
 	errorCode      uint64
 	errorMsg       string
 	secondPerToken time.Duration
 	tokenBucket    chan struct{}
 }
 
-var RateLimitStrategyInstance = NewRateLimitStrategy(time.Second, 5)
+var RateLimitStrategyInstance = NewRateLimitStrategy(context.Background(), time.Second, 5)
 
-func NewRateLimitStrategy(secondPerToken time.Duration, maxTokenCount int) *RateLimitStrategy {
-	rateLimitStrategyInstance := &RateLimitStrategy{
+func NewRateLimitStrategy(
+	ctx context.Context,
+	secondPerToken time.Duration,
+	maxTokenCount int,
+) *RateLimitStrategy {
+	return &RateLimitStrategy{
+		ctx:            ctx,
 		secondPerToken: secondPerToken,
 		tokenBucket:    make(chan struct{}, maxTokenCount),
 	}
-	go func(rateLimitStrategyInstance *RateLimitStrategy) {
+}
+
+func (rls *RateLimitStrategy) Init(param interface{}) {
+	go func() {
 		timer := time.NewTimer(0)
 		defer timer.Stop()
 		for {
 			select {
 			case <-timer.C:
 				select {
-				case rateLimitStrategyInstance.tokenBucket <- struct{}{}:
+				case rls.tokenBucket <- struct{}{}:
 				default:
 				}
-				timer.Reset(rateLimitStrategyInstance.secondPerToken)
-			case <-go_application.Application.OnFinished():
+				timer.Reset(rls.secondPerToken)
+			case <-rls.ctx.Done():
 				return
 			}
 		}
-	}(rateLimitStrategyInstance)
-	return rateLimitStrategyInstance
+	}()
 }
 
-func (rls *RateLimitStrategy) GetName() string {
+func (rls *RateLimitStrategy) Name() string {
 	return `RateLimitStrategy`
 }
 
-func (rls *RateLimitStrategy) GetDescription() string {
+func (rls *RateLimitStrategy) Description() string {
 	return `rate limit`
 }
 
@@ -56,7 +65,7 @@ func (rls *RateLimitStrategy) SetErrorCode(code uint64) api_strategy.IApiStrateg
 	return rls
 }
 
-func (rls *RateLimitStrategy) GetErrorCode() uint64 {
+func (rls *RateLimitStrategy) ErrorCode() uint64 {
 	if rls.errorCode == 0 {
 		return go_error.INTERNAL_ERROR_CODE
 	}
@@ -68,7 +77,7 @@ func (rls *RateLimitStrategy) SetErrorMsg(msg string) api_strategy.IApiStrategy 
 	return rls
 }
 
-func (rls *RateLimitStrategy) GetErrorMsg() string {
+func (rls *RateLimitStrategy) ErrorMsg() string {
 	if rls.errorMsg == "" {
 		return "Rate limit reached."
 	}
@@ -76,10 +85,10 @@ func (rls *RateLimitStrategy) GetErrorMsg() string {
 }
 
 func (rls *RateLimitStrategy) Execute(out api_session.IApiSession, param interface{}) *go_error.ErrorInfo {
-	out.Logger().DebugF(`api-strategy %s trigger`, rls.GetName())
+	out.Logger().DebugF(`api-strategy %s trigger`, rls.Name())
 	succ := rls.takeAvailable(out, false)
 	if !succ {
-		return go_error.WrapWithAll(fmt.Errorf(rls.GetErrorMsg()), rls.GetErrorCode(), nil)
+		return go_error.WrapWithAll(fmt.Errorf(rls.ErrorMsg()), rls.ErrorCode(), nil)
 	}
 
 	return nil

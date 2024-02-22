@@ -2,10 +2,10 @@ package api_strategy
 
 import (
 	"fmt"
+
 	api_session "github.com/pefish/go-core-type/api-session"
 	api_strategy "github.com/pefish/go-core-type/api-strategy"
-
-	"github.com/pefish/go-error"
+	go_error "github.com/pefish/go-error"
 )
 
 type IpFilterStrategy struct {
@@ -19,15 +19,19 @@ func NewIpFilterStrategy() *IpFilterStrategy {
 	return &IpFilterStrategy{}
 }
 
-type IpFilterParam struct {
-	GetValidIp func(apiSession api_session.IApiSession) []string
+func (ifs *IpFilterStrategy) Init(param interface{}) {
+
 }
 
-func (ifs *IpFilterStrategy) GetName() string {
+type IpFilterParam struct {
+	ValidIp func(apiSession api_session.IApiSession) []string
+}
+
+func (ifs *IpFilterStrategy) Name() string {
 	return `IpFilterStrategy`
 }
 
-func (ifs *IpFilterStrategy) GetDescription() string {
+func (ifs *IpFilterStrategy) Description() string {
 	return `filter ip`
 }
 
@@ -36,7 +40,7 @@ func (ifs *IpFilterStrategy) SetErrorCode(code uint64) api_strategy.IApiStrategy
 	return ifs
 }
 
-func (ifs *IpFilterStrategy) GetErrorCode() uint64 {
+func (ifs *IpFilterStrategy) ErrorCode() uint64 {
 	if ifs.errorCode == 0 {
 		return go_error.INTERNAL_ERROR_CODE
 	}
@@ -48,7 +52,7 @@ func (ifs *IpFilterStrategy) SetErrorMsg(msg string) api_strategy.IApiStrategy {
 	return ifs
 }
 
-func (ifs *IpFilterStrategy) GetErrorMsg() string {
+func (ifs *IpFilterStrategy) ErrorMsg() string {
 	if ifs.errorMsg == "" {
 		return "Ip is baned."
 	}
@@ -56,21 +60,21 @@ func (ifs *IpFilterStrategy) GetErrorMsg() string {
 }
 
 func (ifs *IpFilterStrategy) Execute(out api_session.IApiSession, param interface{}) *go_error.ErrorInfo {
-	out.Logger().DebugF(`api-strategy %s trigger`, ifs.GetName())
+	out.Logger().DebugF(`api-strategy %s trigger`, ifs.Name())
 	if param == nil {
 		out.Logger().ErrorF(`strategy need param`)
-		return go_error.WrapWithAll(fmt.Errorf(ifs.GetErrorMsg()), ifs.GetErrorCode(), nil)
+		return go_error.WrapWithAll(fmt.Errorf(ifs.ErrorMsg()), ifs.ErrorCode(), nil)
 	}
 	newParam := param.(IpFilterParam)
-	if newParam.GetValidIp == nil {
+	if newParam.ValidIp == nil {
 		return nil
 	}
 	clientIp := out.RemoteAddress()
-	allowedIps := newParam.GetValidIp(out)
+	allowedIps := newParam.ValidIp(out)
 	for _, ip := range allowedIps {
 		if ip == clientIp {
 			return nil
 		}
 	}
-	return go_error.WrapWithAll(fmt.Errorf(ifs.GetErrorMsg()), ifs.GetErrorCode(), nil)
+	return go_error.WrapWithAll(fmt.Errorf(ifs.ErrorMsg()), ifs.ErrorCode(), nil)
 }
