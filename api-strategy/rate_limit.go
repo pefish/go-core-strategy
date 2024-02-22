@@ -19,8 +19,6 @@ type RateLimitStrategy struct {
 	tokenBucket    chan struct{}
 }
 
-var RateLimitStrategyInstance = NewRateLimitStrategy(context.Background(), time.Second, 5)
-
 func NewRateLimitStrategy(
 	ctx context.Context,
 	secondPerToken time.Duration,
@@ -33,7 +31,7 @@ func NewRateLimitStrategy(
 	}
 }
 
-func (rls *RateLimitStrategy) Init(param interface{}) {
+func (rls *RateLimitStrategy) Init(param interface{}) api_strategy.IApiStrategy {
 	go func() {
 		timer := time.NewTimer(0)
 		defer timer.Stop()
@@ -50,6 +48,7 @@ func (rls *RateLimitStrategy) Init(param interface{}) {
 			}
 		}
 	}()
+	return rls
 }
 
 func (rls *RateLimitStrategy) Name() string {

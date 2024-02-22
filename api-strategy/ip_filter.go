@@ -13,14 +13,12 @@ type IpFilterStrategy struct {
 	errorMsg  string
 }
 
-var IpFilterStrategyInstance = NewIpFilterStrategy()
-
 func NewIpFilterStrategy() *IpFilterStrategy {
 	return &IpFilterStrategy{}
 }
 
-func (ifs *IpFilterStrategy) Init(param interface{}) {
-
+func (ifs *IpFilterStrategy) Init(param interface{}) api_strategy.IApiStrategy {
+	return ifs
 }
 
 type IpFilterParam struct {

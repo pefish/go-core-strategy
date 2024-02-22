@@ -59,7 +59,7 @@ func (grls *GlobalRateLimitStrategy) ErrorCode() uint64 {
 	return grls.errorCode
 }
 
-func (grls *GlobalRateLimitStrategy) Init(param interface{}) {
+func (grls *GlobalRateLimitStrategy) Init(param interface{}) api_strategy.IApiStrategy {
 	go func() {
 		params := param.(GlobalRateLimitStrategyParam)
 		ticker := time.NewTicker(params.FillInterval)
@@ -76,6 +76,7 @@ func (grls *GlobalRateLimitStrategy) Init(param interface{}) {
 			}
 		}
 	}()
+	return grls
 }
 
 type GlobalRateLimitStrategyParam struct {

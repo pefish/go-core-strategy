@@ -18,14 +18,12 @@ type JwtAuthStrategy struct {
 	errorMsg      string
 }
 
-var JwtAuthApiStrategyInstance = NewJwtAuthStrategy()
-
 func NewJwtAuthStrategy() *JwtAuthStrategy {
 	return &JwtAuthStrategy{}
 }
 
-func (jas *JwtAuthStrategy) Init(param interface{}) {
-
+func (jas *JwtAuthStrategy) Init(param interface{}) api_strategy.IApiStrategy {
+	return jas
 }
 
 func (jas *JwtAuthStrategy) Name() string {

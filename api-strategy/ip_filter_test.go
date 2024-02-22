@@ -15,7 +15,9 @@ func TestIpFilterStrategyClass_Execute(t *testing.T) {
 	apiSessionInstance := mock_api_session.NewMockIApiSession(ctrl)
 	apiSessionInstance.EXPECT().RemoteAddress().Return("127.0.0.34").AnyTimes()
 	apiSessionInstance.EXPECT().Logger().Return(go_logger.Logger).AnyTimes()
-	err := IpFilterStrategyInstance.Execute(
+	ipFilterStrategyInstance := NewIpFilterStrategy()
+	ipFilterStrategyInstance.Init(nil)
+	err := ipFilterStrategyInstance.Execute(
 		apiSessionInstance,
 		IpFilterParam{
 			ValidIp: func(apiSession _type.IApiSession) []string {
@@ -25,9 +27,9 @@ func TestIpFilterStrategyClass_Execute(t *testing.T) {
 	)
 	go_test_.Equal(t, (*go_error.ErrorInfo)(nil), err)
 
-	err = IpFilterStrategyInstance.Execute(apiSessionInstance, IpFilterParam{ValidIp: func(apiSession _type.IApiSession) []string {
+	err = ipFilterStrategyInstance.Execute(apiSessionInstance, IpFilterParam{ValidIp: func(apiSession _type.IApiSession) []string {
 		return []string{"127.0.0.1"}
 	}})
-	go_test_.Equal(t, IpFilterStrategyInstance.ErrorCode(), err.Code)
+	go_test_.Equal(t, ipFilterStrategyInstance.ErrorCode(), err.Code)
 	go_test_.Equal(t, "Ip is baned.", err.Err.Error())
 }
