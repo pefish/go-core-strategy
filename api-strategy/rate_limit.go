@@ -89,7 +89,7 @@ func (rls *RateLimitStrategy) ErrorMsg() string {
 }
 
 func (rls *RateLimitStrategy) Execute(out api_session.IApiSession, param interface{}) *go_error.ErrorInfo {
-	rls.logger.DebugF(`Api-strategy %s trigger.`, rls.Name())
+	rls.logger.DebugF(`Api strategy %s trigger.`, rls.Name())
 	succ := rls.takeAvailable(out, false)
 	if !succ {
 		return go_error.WrapWithAll(fmt.Errorf(rls.ErrorMsg()), rls.ErrorCode(), nil)

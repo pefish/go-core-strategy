@@ -75,7 +75,7 @@ func (jas *JwtAuthStrategy) SetHeaderName(headerName string) {
 }
 
 func (jas *JwtAuthStrategy) Execute(out api_session.IApiSession, param interface{}) *go_error.ErrorInfo {
-	out.Logger().DebugF(`api-strategy %s trigger`, jas.Name())
+	out.Logger().DebugF(`Api strategy %s trigger`, jas.Name())
 
 	headerName := jas.headerName
 	if headerName == "" {

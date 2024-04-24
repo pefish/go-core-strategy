@@ -58,7 +58,7 @@ func (ifs *IpFilterStrategy) ErrorMsg() string {
 }
 
 func (ifs *IpFilterStrategy) Execute(out api_session.IApiSession, param interface{}) *go_error.ErrorInfo {
-	out.Logger().DebugF(`api-strategy %s trigger`, ifs.Name())
+	out.Logger().DebugF(`Api strategy %s trigger`, ifs.Name())
 	if param == nil {
 		out.Logger().ErrorF(`strategy need param`)
 		return go_error.WrapWithAll(fmt.Errorf(ifs.ErrorMsg()), ifs.ErrorCode(), nil)
