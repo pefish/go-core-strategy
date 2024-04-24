@@ -13,26 +13,41 @@ import (
 )
 
 type RateLimitStrategy struct {
-	ctx            context.Context
-	logger         go_logger.InterfaceLogger
-	errorCode      uint64
-	errorMsg       string
-	secondPerToken time.Duration
-	tokenBucket    chan struct{}
+	ctx         context.Context
+	logger      go_logger.InterfaceLogger
+	errorCode   uint64
+	errorMsg    string
+	tokenBucket chan struct{}
+	params      RateLimitStrategyParams
+}
+
+type RateLimitStrategyParams struct {
+	SecondPerToken time.Duration // 每这么长时间往令牌桶塞一个令牌
 }
 
 func NewRateLimitStrategy(
 	ctx context.Context,
 	logger go_logger.InterfaceLogger,
-	secondPerToken time.Duration,
 	maxTokenCount int,
 ) *RateLimitStrategy {
 	rls := &RateLimitStrategy{
-		ctx:            ctx,
-		logger:         logger,
-		secondPerToken: secondPerToken,
-		tokenBucket:    make(chan struct{}, maxTokenCount),
+		ctx:         ctx,
+		logger:      logger,
+		tokenBucket: make(chan struct{}, maxTokenCount),
 	}
+	return rls
+}
+
+func (rls *RateLimitStrategy) Name() string {
+	return `RateLimitStrategy`
+}
+
+func (rls *RateLimitStrategy) Description() string {
+	return `rate limit`
+}
+
+func (rls *RateLimitStrategy) SetParamsAndRun(params RateLimitStrategyParams) api_strategy.IApiStrategy {
+	rls.params = params
 	go func() {
 		timer := time.NewTimer(0)
 		defer timer.Stop()
@@ -44,21 +59,13 @@ func NewRateLimitStrategy(
 					rls.logger.DebugF("[%s] New token to bocket.", rls.Name())
 				default:
 				}
-				timer.Reset(rls.secondPerToken)
+				timer.Reset(params.SecondPerToken)
 			case <-rls.ctx.Done():
 				return
 			}
 		}
 	}()
 	return rls
-}
-
-func (rls *RateLimitStrategy) Name() string {
-	return `RateLimitStrategy`
-}
-
-func (rls *RateLimitStrategy) Description() string {
-	return `rate limit`
 }
 
 func (rls *RateLimitStrategy) SetErrorCode(code uint64) api_strategy.IApiStrategy {

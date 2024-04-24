@@ -12,24 +12,35 @@ import (
 )
 
 type GlobalRateLimitStrategy struct {
+	ctx         context.Context
 	tokenBucket chan struct{}
 	errorCode   uint64
 	errorMsg    string
 	params      GlobalRateLimitStrategyParams
 }
 
-var GlobalRateLimitStrategyInstance = NewGlobalRateLimitStrategy(context.Background(), GlobalRateLimitStrategyParams{
-	FillInterval: 3 * time.Second,
-})
+var GlobalRateLimitStrategyInstance = NewGlobalRateLimitStrategy(context.Background())
 
 func NewGlobalRateLimitStrategy(
 	ctx context.Context,
-	params GlobalRateLimitStrategyParams,
 ) *GlobalRateLimitStrategy {
 	grls := &GlobalRateLimitStrategy{
+		ctx:         ctx,
 		tokenBucket: make(chan struct{}, 200),
-		params:      params,
 	}
+	return grls
+}
+
+func (grls *GlobalRateLimitStrategy) Name() string {
+	return `GlobalRateLimitStrategy`
+}
+
+func (grls *GlobalRateLimitStrategy) Description() string {
+	return `global rate limit for all api`
+}
+
+func (grls *GlobalRateLimitStrategy) SetParamsAndRun(params GlobalRateLimitStrategyParams) api_strategy.IApiStrategy {
+	grls.params = params
 	go func() {
 		ticker := time.NewTicker(params.FillInterval)
 		defer ticker.Stop()
@@ -40,20 +51,12 @@ func NewGlobalRateLimitStrategy(
 				case grls.tokenBucket <- struct{}{}:
 				default:
 				}
-			case <-ctx.Done():
+			case <-grls.ctx.Done():
 				return
 			}
 		}
 	}()
 	return grls
-}
-
-func (grls *GlobalRateLimitStrategy) Name() string {
-	return `GlobalRateLimitStrategy`
-}
-
-func (grls *GlobalRateLimitStrategy) Description() string {
-	return `global rate limit for all api`
 }
 
 func (grls *GlobalRateLimitStrategy) SetErrorCode(code uint64) api_strategy.IApiStrategy {

@@ -14,10 +14,8 @@ type IpFilterStrategy struct {
 	params    IpFilterParams
 }
 
-func NewIpFilterStrategy(params IpFilterParams) *IpFilterStrategy {
-	return &IpFilterStrategy{
-		params: params,
-	}
+func NewIpFilterStrategy() *IpFilterStrategy {
+	return &IpFilterStrategy{}
 }
 
 type IpFilterParams struct {
@@ -30,6 +28,11 @@ func (ifs *IpFilterStrategy) Name() string {
 
 func (ifs *IpFilterStrategy) Description() string {
 	return `filter ip`
+}
+
+func (b *IpFilterStrategy) SetParams(params IpFilterParams) api_strategy.IApiStrategy {
+	b.params = params
+	return b
 }
 
 func (ifs *IpFilterStrategy) SetErrorCode(code uint64) api_strategy.IApiStrategy {

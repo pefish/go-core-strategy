@@ -20,12 +20,8 @@ type BasicAuthStrategy struct {
 	params    BasicAuthParams
 }
 
-func NewBasicAuthStrategy(
-	params BasicAuthParams,
-) *BasicAuthStrategy {
-	return &BasicAuthStrategy{
-		params: params,
-	}
+func NewBasicAuthStrategy() *BasicAuthStrategy {
+	return &BasicAuthStrategy{}
 }
 
 func (b *BasicAuthStrategy) Name() string {
@@ -38,6 +34,11 @@ func (b *BasicAuthStrategy) Description() string {
 
 func (b *BasicAuthStrategy) SetErrorCode(code uint64) api_strategy.IApiStrategy {
 	b.errorCode = code
+	return b
+}
+
+func (b *BasicAuthStrategy) SetParams(params BasicAuthParams) api_strategy.IApiStrategy {
+	b.params = params
 	return b
 }
 
