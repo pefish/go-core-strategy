@@ -1,13 +1,14 @@
 package api_strategy
 
 import (
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	mock_api_session "github.com/pefish/go-core-strategy/api-strategy/mock/mock-api-session"
 	_type "github.com/pefish/go-core-type/api-session"
 	go_error "github.com/pefish/go-error"
 	go_logger "github.com/pefish/go-logger"
 	go_test_ "github.com/pefish/go-test"
-	"testing"
 )
 
 func TestIpFilterStrategyClass_Execute(t *testing.T) {
@@ -19,7 +20,7 @@ func TestIpFilterStrategyClass_Execute(t *testing.T) {
 	ipFilterStrategyInstance.Init(nil)
 	err := ipFilterStrategyInstance.Execute(
 		apiSessionInstance,
-		IpFilterParam{
+		IpFilterParams{
 			ValidIp: func(apiSession _type.IApiSession) []string {
 				return []string{"127.0.0.34"}
 			},
@@ -27,7 +28,7 @@ func TestIpFilterStrategyClass_Execute(t *testing.T) {
 	)
 	go_test_.Equal(t, (*go_error.ErrorInfo)(nil), err)
 
-	err = ipFilterStrategyInstance.Execute(apiSessionInstance, IpFilterParam{ValidIp: func(apiSession _type.IApiSession) []string {
+	err = ipFilterStrategyInstance.Execute(apiSessionInstance, IpFilterParams{ValidIp: func(apiSession _type.IApiSession) []string {
 		return []string{"127.0.0.1"}
 	}})
 	go_test_.Equal(t, ipFilterStrategyInstance.ErrorCode(), err.Code)

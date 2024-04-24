@@ -11,17 +11,16 @@ import (
 type IpFilterStrategy struct {
 	errorCode uint64
 	errorMsg  string
+	params    IpFilterParams
 }
 
-func NewIpFilterStrategy() *IpFilterStrategy {
-	return &IpFilterStrategy{}
+func NewIpFilterStrategy(params IpFilterParams) *IpFilterStrategy {
+	return &IpFilterStrategy{
+		params: params,
+	}
 }
 
-func (ifs *IpFilterStrategy) Init(param interface{}) api_strategy.IApiStrategy {
-	return ifs
-}
-
-type IpFilterParam struct {
+type IpFilterParams struct {
 	ValidIp func(apiSession api_session.IApiSession) []string
 }
 
@@ -57,18 +56,13 @@ func (ifs *IpFilterStrategy) ErrorMsg() string {
 	return ifs.errorMsg
 }
 
-func (ifs *IpFilterStrategy) Execute(out api_session.IApiSession, param interface{}) *go_error.ErrorInfo {
+func (ifs *IpFilterStrategy) Execute(out api_session.IApiSession) *go_error.ErrorInfo {
 	out.Logger().DebugF(`Api strategy %s trigger`, ifs.Name())
-	if param == nil {
-		out.Logger().ErrorF(`strategy need param`)
-		return go_error.WrapWithAll(fmt.Errorf(ifs.ErrorMsg()), ifs.ErrorCode(), nil)
-	}
-	newParam := param.(IpFilterParam)
-	if newParam.ValidIp == nil {
+	if ifs.params.ValidIp == nil {
 		return nil
 	}
 	clientIp := out.RemoteAddress()
-	allowedIps := newParam.ValidIp(out)
+	allowedIps := ifs.params.ValidIp(out)
 	for _, ip := range allowedIps {
 		if ip == clientIp {
 			return nil

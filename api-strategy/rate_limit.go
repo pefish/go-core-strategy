@@ -27,15 +27,12 @@ func NewRateLimitStrategy(
 	secondPerToken time.Duration,
 	maxTokenCount int,
 ) *RateLimitStrategy {
-	return &RateLimitStrategy{
+	rls := &RateLimitStrategy{
 		ctx:            ctx,
 		logger:         logger,
 		secondPerToken: secondPerToken,
 		tokenBucket:    make(chan struct{}, maxTokenCount),
 	}
-}
-
-func (rls *RateLimitStrategy) Init(param interface{}) api_strategy.IApiStrategy {
 	go func() {
 		timer := time.NewTimer(0)
 		defer timer.Stop()
@@ -88,7 +85,7 @@ func (rls *RateLimitStrategy) ErrorMsg() string {
 	return rls.errorMsg
 }
 
-func (rls *RateLimitStrategy) Execute(out api_session.IApiSession, param interface{}) *go_error.ErrorInfo {
+func (rls *RateLimitStrategy) Execute(out api_session.IApiSession) *go_error.ErrorInfo {
 	rls.logger.DebugF(`Api strategy %s trigger.`, rls.Name())
 	succ := rls.takeAvailable(out, false)
 	if !succ {

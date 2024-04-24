@@ -12,19 +12,40 @@ import (
 )
 
 type GlobalRateLimitStrategy struct {
-	ctx         context.Context
 	tokenBucket chan struct{}
 	errorCode   uint64
 	errorMsg    string
+	params      GlobalRateLimitStrategyParams
 }
 
-var GlobalRateLimitStrategyInstance = NewGlobalRateLimitStrategy(context.Background())
+var GlobalRateLimitStrategyInstance = NewGlobalRateLimitStrategy(context.Background(), GlobalRateLimitStrategyParams{
+	FillInterval: 3 * time.Second,
+})
 
-func NewGlobalRateLimitStrategy(ctx context.Context) *GlobalRateLimitStrategy {
-	return &GlobalRateLimitStrategy{
-		ctx:         ctx,
+func NewGlobalRateLimitStrategy(
+	ctx context.Context,
+	params GlobalRateLimitStrategyParams,
+) *GlobalRateLimitStrategy {
+	grls := &GlobalRateLimitStrategy{
 		tokenBucket: make(chan struct{}, 200),
+		params:      params,
 	}
+	go func() {
+		ticker := time.NewTicker(params.FillInterval)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				select {
+				case grls.tokenBucket <- struct{}{}:
+				default:
+				}
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+	return grls
 }
 
 func (grls *GlobalRateLimitStrategy) Name() string {
@@ -59,31 +80,11 @@ func (grls *GlobalRateLimitStrategy) ErrorCode() uint64 {
 	return grls.errorCode
 }
 
-func (grls *GlobalRateLimitStrategy) Init(param interface{}) api_strategy.IApiStrategy {
-	go func() {
-		params := param.(GlobalRateLimitStrategyParam)
-		ticker := time.NewTicker(params.FillInterval)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-ticker.C:
-				select {
-				case grls.tokenBucket <- struct{}{}:
-				default:
-				}
-			case <-grls.ctx.Done():
-				return
-			}
-		}
-	}()
-	return grls
-}
-
-type GlobalRateLimitStrategyParam struct {
+type GlobalRateLimitStrategyParams struct {
 	FillInterval time.Duration // 每这么长时间往令牌桶塞一个令牌
 }
 
-func (grls *GlobalRateLimitStrategy) Execute(out _type.IApiSession, param interface{}) *go_error.ErrorInfo {
+func (grls *GlobalRateLimitStrategy) Execute(out _type.IApiSession) *go_error.ErrorInfo {
 	out.Logger().DebugF(`api-strategy %s trigger`, grls.Name())
 
 	succ := grls.takeAvailable(out, false)

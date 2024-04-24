@@ -2,11 +2,12 @@ package api_strategy
 
 import (
 	"fmt"
+
 	api_session "github.com/pefish/go-core-type/api-session"
 	api_strategy "github.com/pefish/go-core-type/api-strategy"
-	"github.com/pefish/go-error"
-	"github.com/pefish/go-jwt"
-	"github.com/pefish/go-reflect"
+	go_error "github.com/pefish/go-error"
+	go_jwt "github.com/pefish/go-jwt"
+	go_reflect "github.com/pefish/go-reflect"
 )
 
 type JwtAuthStrategy struct {
@@ -20,10 +21,6 @@ type JwtAuthStrategy struct {
 
 func NewJwtAuthStrategy() *JwtAuthStrategy {
 	return &JwtAuthStrategy{}
-}
-
-func (jas *JwtAuthStrategy) Init(param interface{}) api_strategy.IApiStrategy {
-	return jas
 }
 
 func (jas *JwtAuthStrategy) Name() string {
@@ -74,7 +71,7 @@ func (jas *JwtAuthStrategy) SetHeaderName(headerName string) {
 	jas.headerName = headerName
 }
 
-func (jas *JwtAuthStrategy) Execute(out api_session.IApiSession, param interface{}) *go_error.ErrorInfo {
+func (jas *JwtAuthStrategy) Execute(out api_session.IApiSession) *go_error.ErrorInfo {
 	out.Logger().DebugF(`Api strategy %s trigger`, jas.Name())
 
 	headerName := jas.headerName

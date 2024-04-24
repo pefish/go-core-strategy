@@ -9,25 +9,23 @@ import (
 	go_error "github.com/pefish/go-error"
 )
 
+type BasicAuthParams struct {
+	Username string
+	Password string
+}
+
 type BasicAuthStrategy struct {
 	errorCode uint64
 	errorMsg  string
-	username  string
-	password  string
+	params    BasicAuthParams
 }
 
 func NewBasicAuthStrategy(
-	username string,
-	password string,
+	params BasicAuthParams,
 ) *BasicAuthStrategy {
 	return &BasicAuthStrategy{
-		username: username,
-		password: password,
+		params: params,
 	}
-}
-
-func (b *BasicAuthStrategy) Init(param interface{}) api_strategy.IApiStrategy {
-	return b
 }
 
 func (b *BasicAuthStrategy) Name() string {
@@ -62,11 +60,11 @@ func (b *BasicAuthStrategy) ErrorCode() uint64 {
 	return b.errorCode
 }
 
-func (b *BasicAuthStrategy) Execute(out api_session.IApiSession, param interface{}) *go_error.ErrorInfo {
+func (b *BasicAuthStrategy) Execute(out api_session.IApiSession) *go_error.ErrorInfo {
 	out.Logger().DebugF(`Api strategy %s trigger`, b.Name())
 
 	u, p, ok := out.Request().BasicAuth()
-	if !ok || !strings.EqualFold(b.username, u) || !strings.EqualFold(b.password, p) {
+	if !ok || !strings.EqualFold(b.params.Username, u) || !strings.EqualFold(b.params.Password, p) {
 		return go_error.WrapWithAll(fmt.Errorf(b.ErrorMsg()), b.ErrorCode(), nil)
 	}
 
