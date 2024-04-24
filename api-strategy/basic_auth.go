@@ -12,10 +12,18 @@ import (
 type BasicAuthStrategy struct {
 	errorCode uint64
 	errorMsg  string
+	username  string
+	password  string
 }
 
-func NewBasicAuthStrategy() *BasicAuthStrategy {
-	return &BasicAuthStrategy{}
+func NewBasicAuthStrategy(
+	username string,
+	password string,
+) *BasicAuthStrategy {
+	return &BasicAuthStrategy{
+		username: username,
+		password: password,
+	}
 }
 
 func (b *BasicAuthStrategy) Init(param interface{}) api_strategy.IApiStrategy {
@@ -54,21 +62,11 @@ func (b *BasicAuthStrategy) ErrorCode() uint64 {
 	return b.errorCode
 }
 
-type BasicAuthParam struct {
-	Username string
-	Password string
-}
-
 func (b *BasicAuthStrategy) Execute(out api_session.IApiSession, param interface{}) *go_error.ErrorInfo {
 	out.Logger().DebugF(`Api strategy %s trigger`, b.Name())
-	if param == nil {
-		out.Logger().ErrorF(`Strategy need param.`)
-		return go_error.WrapWithAll(fmt.Errorf(b.ErrorMsg()), b.ErrorCode(), nil)
-	}
-	params := param.(BasicAuthParam)
 
 	u, p, ok := out.Request().BasicAuth()
-	if !ok || !strings.EqualFold(params.Username, u) || !strings.EqualFold(params.Password, p) {
+	if !ok || !strings.EqualFold(b.username, u) || !strings.EqualFold(b.password, p) {
 		return go_error.WrapWithAll(fmt.Errorf(b.ErrorMsg()), b.ErrorCode(), nil)
 	}
 
