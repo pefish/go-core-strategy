@@ -11,7 +11,7 @@ import (
 type IpFilterStrategy struct {
 	errorCode uint64
 	errorMsg  string
-	params    IpFilterParams
+	params    *IpFilterParams
 }
 
 func NewIpFilterStrategy() *IpFilterStrategy {
@@ -30,7 +30,7 @@ func (ifs *IpFilterStrategy) Description() string {
 	return `filter ip`
 }
 
-func (b *IpFilterStrategy) SetParams(params IpFilterParams) api_strategy.IApiStrategy {
+func (b *IpFilterStrategy) SetParams(params *IpFilterParams) *IpFilterStrategy {
 	b.params = params
 	return b
 }

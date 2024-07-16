@@ -16,7 +16,7 @@ type GlobalRateLimitStrategy struct {
 	tokenBucket chan struct{}
 	errorCode   uint64
 	errorMsg    string
-	params      GlobalRateLimitStrategyParams
+	params      *GlobalRateLimitStrategyParams
 }
 
 var GlobalRateLimitStrategyInstance = NewGlobalRateLimitStrategy(context.Background())
@@ -39,7 +39,7 @@ func (grls *GlobalRateLimitStrategy) Description() string {
 	return `global rate limit for all api`
 }
 
-func (grls *GlobalRateLimitStrategy) SetParamsAndRun(params GlobalRateLimitStrategyParams) api_strategy.IApiStrategy {
+func (grls *GlobalRateLimitStrategy) SetParamsAndRun(params *GlobalRateLimitStrategyParams) api_strategy.IApiStrategy {
 	grls.params = params
 	go func() {
 		ticker := time.NewTicker(params.FillInterval)

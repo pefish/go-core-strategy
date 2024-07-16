@@ -18,7 +18,7 @@ type RateLimitStrategy struct {
 	errorCode   uint64
 	errorMsg    string
 	tokenBucket chan struct{}
-	params      RateLimitStrategyParams
+	params      *RateLimitStrategyParams
 }
 
 type RateLimitStrategyParams struct {
@@ -46,7 +46,7 @@ func (rls *RateLimitStrategy) Description() string {
 	return `rate limit`
 }
 
-func (rls *RateLimitStrategy) SetParamsAndRun(params RateLimitStrategyParams) api_strategy.IApiStrategy {
+func (rls *RateLimitStrategy) SetParamsAndRun(params *RateLimitStrategyParams) *RateLimitStrategy {
 	rls.params = params
 	go func() {
 		timer := time.NewTimer(0)

@@ -17,7 +17,7 @@ type BasicAuthParams struct {
 type BasicAuthStrategy struct {
 	errorCode uint64
 	errorMsg  string
-	params    BasicAuthParams
+	params    *BasicAuthParams
 }
 
 func NewBasicAuthStrategy() *BasicAuthStrategy {
@@ -37,7 +37,7 @@ func (b *BasicAuthStrategy) SetErrorCode(code uint64) api_strategy.IApiStrategy 
 	return b
 }
 
-func (b *BasicAuthStrategy) SetParams(params BasicAuthParams) api_strategy.IApiStrategy {
+func (b *BasicAuthStrategy) SetParams(params *BasicAuthParams) *BasicAuthStrategy {
 	b.params = params
 	return b
 }
