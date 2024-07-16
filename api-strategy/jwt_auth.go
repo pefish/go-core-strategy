@@ -76,16 +76,18 @@ func (jas *JwtAuthStrategy) Execute(out api_session.IApiSession) *go_error.Error
 
 	verifyResult, _, body, err := go_jwt.JwtInstance.VerifyJwt(jas.params.PubKey, jwt, jas.params.NoCheckExpire)
 	if err != nil {
+		out.Logger().ErrorF(`VerifyJwt error - %+v.`, err)
 		return go_error.WrapWithAll(fmt.Errorf(jas.ErrorMsg()), jas.ErrorCode(), nil)
 	}
 	if !verifyResult {
+		out.Logger().ErrorF(`VerifyJwt error - verify result is false.`)
 		return go_error.WrapWithAll(fmt.Errorf(jas.ErrorMsg()), jas.ErrorCode(), nil)
 	}
 	out.SetJwtBody(body)
 	if !jas.params.DisableUserId {
 		jwtPayload := body[`payload`].(map[string]interface{})
 		if jwtPayload[`user_id`] == nil {
-			out.Logger().ErrorF(`jwt verify error, user_id not exist`)
+			out.Logger().ErrorF(`Jwt verify error, user_id not exist.`)
 			return go_error.WrapWithAll(fmt.Errorf(jas.ErrorMsg()), jas.ErrorCode(), nil)
 		}
 
