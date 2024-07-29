@@ -5,16 +5,14 @@ import (
 	"fmt"
 	"time"
 
-	api_session "github.com/pefish/go-core-type/api-session"
-	api_strategy "github.com/pefish/go-core-type/api-strategy"
-	go_logger "github.com/pefish/go-logger"
-
-	go_error "github.com/pefish/go-error"
+	i_core "github.com/pefish/go-interface/i-core"
+	i_logger "github.com/pefish/go-interface/i-logger"
+	t_error "github.com/pefish/go-interface/t-error"
 )
 
 type RateLimitStrategy struct {
 	ctx         context.Context
-	logger      go_logger.InterfaceLogger
+	logger      i_logger.ILogger
 	errorCode   uint64
 	errorMsg    string
 	tokenBucket chan struct{}
@@ -27,7 +25,7 @@ type RateLimitStrategyParams struct {
 
 func NewRateLimitStrategy(
 	ctx context.Context,
-	logger go_logger.InterfaceLogger,
+	logger i_logger.ILogger,
 	maxTokenCount int,
 ) *RateLimitStrategy {
 	rls := &RateLimitStrategy{
@@ -68,19 +66,19 @@ func (rls *RateLimitStrategy) SetParamsAndRun(params *RateLimitStrategyParams) *
 	return rls
 }
 
-func (rls *RateLimitStrategy) SetErrorCode(code uint64) api_strategy.IApiStrategy {
+func (rls *RateLimitStrategy) SetErrorCode(code uint64) i_core.IApiStrategy {
 	rls.errorCode = code
 	return rls
 }
 
 func (rls *RateLimitStrategy) ErrorCode() uint64 {
 	if rls.errorCode == 0 {
-		return go_error.INTERNAL_ERROR_CODE
+		return t_error.INTERNAL_ERROR_CODE
 	}
 	return rls.errorCode
 }
 
-func (rls *RateLimitStrategy) SetErrorMsg(msg string) api_strategy.IApiStrategy {
+func (rls *RateLimitStrategy) SetErrorMsg(msg string) i_core.IApiStrategy {
 	rls.errorMsg = msg
 	return rls
 }
@@ -92,17 +90,17 @@ func (rls *RateLimitStrategy) ErrorMsg() string {
 	return rls.errorMsg
 }
 
-func (rls *RateLimitStrategy) Execute(out api_session.IApiSession) *go_error.ErrorInfo {
+func (rls *RateLimitStrategy) Execute(out i_core.IApiSession) *t_error.ErrorInfo {
 	rls.logger.DebugF(`Api strategy %s trigger.`, rls.Name())
 	succ := rls.takeAvailable(out, false)
 	if !succ {
-		return go_error.WrapWithAll(fmt.Errorf(rls.ErrorMsg()), rls.ErrorCode(), nil)
+		return t_error.WrapWithAll(fmt.Errorf(rls.ErrorMsg()), rls.ErrorCode(), nil)
 	}
 
 	return nil
 }
 
-func (rls *RateLimitStrategy) takeAvailable(out api_session.IApiSession, block bool) bool {
+func (rls *RateLimitStrategy) takeAvailable(out i_core.IApiSession, block bool) bool {
 	var takenResult bool
 	if block {
 		select {

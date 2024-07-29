@@ -3,9 +3,8 @@ package api_strategy
 import (
 	"fmt"
 
-	api_session "github.com/pefish/go-core-type/api-session"
-	api_strategy "github.com/pefish/go-core-type/api-strategy"
-	go_error "github.com/pefish/go-error"
+	i_core "github.com/pefish/go-interface/i-core"
+	t_error "github.com/pefish/go-interface/t-error"
 )
 
 type IpFilterStrategy struct {
@@ -19,7 +18,7 @@ func NewIpFilterStrategy() *IpFilterStrategy {
 }
 
 type IpFilterParams struct {
-	ValidIp func(apiSession api_session.IApiSession) []string
+	ValidIp func(apiSession i_core.IApiSession) []string
 }
 
 func (ifs *IpFilterStrategy) Name() string {
@@ -35,19 +34,19 @@ func (b *IpFilterStrategy) SetParams(params *IpFilterParams) *IpFilterStrategy {
 	return b
 }
 
-func (ifs *IpFilterStrategy) SetErrorCode(code uint64) api_strategy.IApiStrategy {
+func (ifs *IpFilterStrategy) SetErrorCode(code uint64) i_core.IApiStrategy {
 	ifs.errorCode = code
 	return ifs
 }
 
 func (ifs *IpFilterStrategy) ErrorCode() uint64 {
 	if ifs.errorCode == 0 {
-		return go_error.INTERNAL_ERROR_CODE
+		return t_error.INTERNAL_ERROR_CODE
 	}
 	return ifs.errorCode
 }
 
-func (ifs *IpFilterStrategy) SetErrorMsg(msg string) api_strategy.IApiStrategy {
+func (ifs *IpFilterStrategy) SetErrorMsg(msg string) i_core.IApiStrategy {
 	ifs.errorMsg = msg
 	return ifs
 }
@@ -59,7 +58,7 @@ func (ifs *IpFilterStrategy) ErrorMsg() string {
 	return ifs.errorMsg
 }
 
-func (ifs *IpFilterStrategy) Execute(out api_session.IApiSession) *go_error.ErrorInfo {
+func (ifs *IpFilterStrategy) Execute(out i_core.IApiSession) *t_error.ErrorInfo {
 	out.Logger().DebugF(`Api strategy %s trigger`, ifs.Name())
 	if ifs.params.ValidIp == nil {
 		return nil
@@ -71,5 +70,5 @@ func (ifs *IpFilterStrategy) Execute(out api_session.IApiSession) *go_error.Erro
 			return nil
 		}
 	}
-	return go_error.WrapWithAll(fmt.Errorf(ifs.ErrorMsg()), ifs.ErrorCode(), nil)
+	return t_error.WrapWithAll(fmt.Errorf(ifs.ErrorMsg()), ifs.ErrorCode(), nil)
 }

@@ -6,9 +6,8 @@ import (
 	"errors"
 	"time"
 
-	_type "github.com/pefish/go-core-type/api-session"
-	api_strategy "github.com/pefish/go-core-type/api-strategy"
-	go_error "github.com/pefish/go-error"
+	i_core "github.com/pefish/go-interface/i-core"
+	t_error "github.com/pefish/go-interface/t-error"
 )
 
 type GlobalRateLimitStrategy struct {
@@ -39,7 +38,7 @@ func (grls *GlobalRateLimitStrategy) Description() string {
 	return `global rate limit for all api`
 }
 
-func (grls *GlobalRateLimitStrategy) SetParamsAndRun(params *GlobalRateLimitStrategyParams) api_strategy.IApiStrategy {
+func (grls *GlobalRateLimitStrategy) SetParamsAndRun(params *GlobalRateLimitStrategyParams) i_core.IApiStrategy {
 	grls.params = params
 	go func() {
 		ticker := time.NewTicker(params.FillInterval)
@@ -59,12 +58,12 @@ func (grls *GlobalRateLimitStrategy) SetParamsAndRun(params *GlobalRateLimitStra
 	return grls
 }
 
-func (grls *GlobalRateLimitStrategy) SetErrorCode(code uint64) api_strategy.IApiStrategy {
+func (grls *GlobalRateLimitStrategy) SetErrorCode(code uint64) i_core.IApiStrategy {
 	grls.errorCode = code
 	return grls
 }
 
-func (grls *GlobalRateLimitStrategy) SetErrorMsg(msg string) api_strategy.IApiStrategy {
+func (grls *GlobalRateLimitStrategy) SetErrorMsg(msg string) i_core.IApiStrategy {
 	grls.errorMsg = msg
 	return grls
 }
@@ -78,7 +77,7 @@ func (grls *GlobalRateLimitStrategy) ErrorMsg() string {
 
 func (grls *GlobalRateLimitStrategy) ErrorCode() uint64 {
 	if grls.errorCode == 0 {
-		return go_error.INTERNAL_ERROR_CODE
+		return t_error.INTERNAL_ERROR_CODE
 	}
 	return grls.errorCode
 }
@@ -87,18 +86,18 @@ type GlobalRateLimitStrategyParams struct {
 	FillInterval time.Duration // 每这么长时间往令牌桶塞一个令牌
 }
 
-func (grls *GlobalRateLimitStrategy) Execute(out _type.IApiSession) *go_error.ErrorInfo {
+func (grls *GlobalRateLimitStrategy) Execute(out i_core.IApiSession) *t_error.ErrorInfo {
 	out.Logger().DebugF(`api-strategy %s trigger`, grls.Name())
 
 	succ := grls.takeAvailable(out, false)
 	if !succ {
-		return go_error.WrapWithAll(errors.New(grls.ErrorMsg()), grls.ErrorCode(), nil)
+		return t_error.WrapWithAll(errors.New(grls.ErrorMsg()), grls.ErrorCode(), nil)
 	}
 
 	return nil
 }
 
-func (grls *GlobalRateLimitStrategy) takeAvailable(out _type.IApiSession, block bool) bool {
+func (grls *GlobalRateLimitStrategy) takeAvailable(out i_core.IApiSession, block bool) bool {
 	var takenResult bool
 	if block {
 		select {

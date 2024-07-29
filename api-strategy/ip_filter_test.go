@@ -5,9 +5,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	mock_api_session "github.com/pefish/go-core-strategy/api-strategy/mock/mock-api-session"
-	_type "github.com/pefish/go-core-type/api-session"
-	go_error "github.com/pefish/go-error"
-	go_logger "github.com/pefish/go-logger"
+	i_logger "github.com/pefish/go-interface/i-logger"
 	go_test_ "github.com/pefish/go-test"
 )
 
@@ -15,7 +13,7 @@ func TestIpFilterStrategyClass_Execute(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	apiSessionInstance := mock_api_session.NewMockIApiSession(ctrl)
 	apiSessionInstance.EXPECT().RemoteAddress().Return("127.0.0.34").AnyTimes()
-	apiSessionInstance.EXPECT().Logger().Return(go_logger.Logger).AnyTimes()
+	apiSessionInstance.EXPECT().Logger().Return(i_logger.DefaultLogger).AnyTimes()
 	ipFilterStrategyInstance := NewIpFilterStrategy()
 	ipFilterStrategyInstance.Init(nil)
 	err := ipFilterStrategyInstance.Execute(

@@ -3,9 +3,8 @@ package api_strategy
 import (
 	"fmt"
 
-	api_session "github.com/pefish/go-core-type/api-session"
-	api_strategy "github.com/pefish/go-core-type/api-strategy"
-	go_error "github.com/pefish/go-error"
+	i_core "github.com/pefish/go-interface/i-core"
+	t_error "github.com/pefish/go-interface/t-error"
 	go_jwt "github.com/pefish/go-jwt"
 	go_reflect "github.com/pefish/go-reflect"
 )
@@ -35,12 +34,12 @@ func (jas *JwtAuthStrategy) Description() string {
 	return `jwt auth`
 }
 
-func (jas *JwtAuthStrategy) SetErrorCode(code uint64) api_strategy.IApiStrategy {
+func (jas *JwtAuthStrategy) SetErrorCode(code uint64) i_core.IApiStrategy {
 	jas.errorCode = code
 	return jas
 }
 
-func (jas *JwtAuthStrategy) SetErrorMsg(msg string) api_strategy.IApiStrategy {
+func (jas *JwtAuthStrategy) SetErrorMsg(msg string) i_core.IApiStrategy {
 	jas.errorMsg = msg
 	return jas
 }
@@ -54,7 +53,7 @@ func (jas *JwtAuthStrategy) ErrorMsg() string {
 
 func (jas *JwtAuthStrategy) ErrorCode() uint64 {
 	if jas.errorCode == 0 {
-		return go_error.INTERNAL_ERROR_CODE
+		return t_error.INTERNAL_ERROR_CODE
 	}
 	return jas.errorCode
 }
@@ -64,7 +63,7 @@ func (jas *JwtAuthStrategy) SetParams(params *JwtAuthStrategyParams) *JwtAuthStr
 	return jas
 }
 
-func (jas *JwtAuthStrategy) Execute(out api_session.IApiSession) *go_error.ErrorInfo {
+func (jas *JwtAuthStrategy) Execute(out i_core.IApiSession) *t_error.ErrorInfo {
 	out.Logger().DebugF(`Api strategy %s trigger`, jas.Name())
 
 	headerName := jas.params.HeaderName
@@ -77,18 +76,18 @@ func (jas *JwtAuthStrategy) Execute(out api_session.IApiSession) *go_error.Error
 	verifyResult, _, body, err := go_jwt.JwtInstance.VerifyJwt(jas.params.PubKey, jwt, jas.params.NoCheckExpire)
 	if err != nil {
 		out.Logger().ErrorF(`VerifyJwt error - %+v.`, err)
-		return go_error.WrapWithAll(fmt.Errorf(jas.ErrorMsg()), jas.ErrorCode(), nil)
+		return t_error.WrapWithAll(fmt.Errorf(jas.ErrorMsg()), jas.ErrorCode(), nil)
 	}
 	if !verifyResult {
 		out.Logger().ErrorF(`VerifyJwt error - verify result is false.`)
-		return go_error.WrapWithAll(fmt.Errorf(jas.ErrorMsg()), jas.ErrorCode(), nil)
+		return t_error.WrapWithAll(fmt.Errorf(jas.ErrorMsg()), jas.ErrorCode(), nil)
 	}
 	out.SetJwtBody(body)
 	if !jas.params.DisableUserId {
 		jwtPayload := body[`payload`].(map[string]interface{})
 		if jwtPayload[`user_id`] == nil {
 			out.Logger().ErrorF(`Jwt verify error, user_id not exist.`)
-			return go_error.WrapWithAll(fmt.Errorf(jas.ErrorMsg()), jas.ErrorCode(), nil)
+			return t_error.WrapWithAll(fmt.Errorf(jas.ErrorMsg()), jas.ErrorCode(), nil)
 		}
 
 		userId := go_reflect.Reflect.MustToUint64(jwtPayload[`user_id`])

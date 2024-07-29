@@ -1,20 +1,21 @@
 package api_strategy
 
 import (
-	"github.com/golang/mock/gomock"
-	mock_api_session "github.com/pefish/go-core-strategy/api-strategy/mock/mock-api-session"
-	go_error "github.com/pefish/go-error"
-	go_jwt "github.com/pefish/go-jwt"
-	go_logger "github.com/pefish/go-logger"
-	go_test_ "github.com/pefish/go-test"
 	"testing"
 	"time"
+
+	"github.com/golang/mock/gomock"
+	mock_api_session "github.com/pefish/go-core-strategy/api-strategy/mock/mock-api-session"
+	i_logger "github.com/pefish/go-interface/i-logger"
+	t_error "github.com/pefish/go-interface/t-error"
+	go_jwt "github.com/pefish/go-jwt"
+	go_test_ "github.com/pefish/go-test"
 )
 
 func TestJwtAuthStrategyClass_Execute(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	apiSessionInstance := mock_api_session.NewMockIApiSession(ctrl)
-	apiSessionInstance.EXPECT().Logger().Return(go_logger.Logger).AnyTimes()
+	apiSessionInstance.EXPECT().Logger().Return(i_logger.DefaultLogger).AnyTimes()
 	apiSessionInstance.EXPECT().Header("jwt").Return("gsfdg")
 	var userIdResult uint64
 	apiSessionInstance.EXPECT().SetJwtBody(gomock.Any()).AnyTimes()
@@ -40,6 +41,6 @@ func TestJwtAuthStrategyClass_Execute(t *testing.T) {
 	apiSessionInstance.EXPECT().Data(gomock.Any()).AnyTimes()
 	apiSessionInstance.EXPECT().SetData(gomock.Any(), gomock.Any()).AnyTimes()
 	err = jwtAuthApiStrategyInstance.Execute(apiSessionInstance, nil)
-	go_test_.Equal(t, (*go_error.ErrorInfo)(nil), err)
+	go_test_.Equal(t, (*t_error.ErrorInfo)(nil), err)
 	go_test_.Equal(t, uint64(6356), userIdResult)
 }
